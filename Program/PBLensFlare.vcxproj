@@ -126,7 +126,7 @@ copy "$(WindowsSdkDir)Redist\D3D\$(PlatformTarget)\dxil.dll" "$(ProjectDir)dxil.
     <ClCompile Include="..\common\imgui\imgui_widgets.cpp" />
     <ClCompile Include="..\common\src\Application.cpp" />
     <ClCompile Include="..\common\src\Swapchain.cpp" />
-    <ClCompile Include="ConstructBuffer.cpp" />
+    <ClCompile Include="src\ConstructBuffer.cpp" />
     <ClCompile Include="src\DiffractionImage.cpp" />
     <ClCompile Include="src\PBLensFlare.cpp" />
     <ClCompile Include="src\DX12Buffer.cpp" />
@@ -137,7 +137,7 @@ copy "$(WindowsSdkDir)Redist\D3D\$(PlatformTarget)\dxil.dll" "$(ProjectDir)dxil.
     <ClCompile Include="src\Shader.cpp" />
     <ClCompile Include="src\ShaderSettings.cpp" />
     <ClCompile Include="src\SimulateLensFlare.cpp" />
-    <ClCompile Include="Update.cpp" />
+    <ClCompile Include="src\Update.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

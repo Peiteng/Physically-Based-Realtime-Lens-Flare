@@ -1,4 +1,4 @@
-#include "include/PBLensFlare.h"
+#include "../include/PBLensFlare.h"
 
 void PBLensFlare::setupWorkingTexture()
 {
