@@ -1,6 +1,11 @@
 # Physically-Based-Lens-Flare
 Lens Flare Rendering with Ray-Tracing and Lens Data
 
+necessary external file / code
+- dxcompiler.dll
+- dxil.dll
+- imgui
+
 Nikon
 ![flare1](https://user-images.githubusercontent.com/65929274/147655774-db4b6e69-f62e-4125-8450-0f19dfd08407.gif)
 
