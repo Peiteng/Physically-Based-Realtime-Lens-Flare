@@ -2,6 +2,7 @@
 Lens Flare Rendering with Ray-Tracing and Lens Data
 
 necessary external file / code
+- d3dx12.h
 - dxcompiler.dll
 - dxil.dll
 - imgui
