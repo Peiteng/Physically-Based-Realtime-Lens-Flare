@@ -513,7 +513,6 @@ void Application::prepareImGui()
 		mDevice.Get(),
 		FrameBufferCount,
 		mSurfaceFormat,
-		cbv_srv_heap,
 		hCpu,
 		hGpu);
 }
