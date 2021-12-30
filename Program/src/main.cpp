@@ -3,7 +3,7 @@
 #include <stdexcept>
 #include "../include/PBLensFlare.h"
 
-#include "imgui.h"
+#include "../common/imgui/imgui.h"
 #include "examples/imgui_impl_win32.h"
 
 const int WINDOW_WIDTH = 1280;

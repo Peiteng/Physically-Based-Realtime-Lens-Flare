@@ -63,12 +63,6 @@
     <ClInclude Include="..\common\d3dx12.h">
       <Filter>ヘッダー ファイル\microsoft</Filter>
     </ClInclude>
-    <ClInclude Include="..\common\AppUtil.h">
-      <Filter>ヘッダー ファイル\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\common\DescriptorManager.h">
-      <Filter>ヘッダー ファイル\Base</Filter>
-    </ClInclude>
     <ClInclude Include="include\DX12Buffer.h">
       <Filter>ヘッダー ファイル\Base</Filter>
     </ClInclude>
@@ -78,13 +72,19 @@
     <ClInclude Include="include\Shader.h">
       <Filter>ヘッダー ファイル\Base</Filter>
     </ClInclude>
-    <ClInclude Include="..\common\Swapchain.h">
-      <Filter>ヘッダー ファイル\Base</Filter>
-    </ClInclude>
     <ClInclude Include="include\PBLensFlare.h">
       <Filter>ヘッダー ファイル\App</Filter>
     </ClInclude>
-    <ClInclude Include="..\common\Application.h">
+    <ClInclude Include="..\common\include\Swapchain.h">
+      <Filter>ヘッダー ファイル\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\include\DescriptorManager.h">
+      <Filter>ヘッダー ファイル\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\include\Application.h">
+      <Filter>ヘッダー ファイル\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\include\AppUtil.h">
       <Filter>ヘッダー ファイル\Base</Filter>
     </ClInclude>
   </ItemGroup>

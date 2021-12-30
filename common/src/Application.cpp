@@ -5,9 +5,9 @@
 #include "../common//include/AppUtil.h"
 
 //IMGUI
-#include "imgui.h"
-#include "examples/imgui_impl_dx12.h"
-#include "examples/imgui_impl_win32.h"
+#include "../imgui/imgui.h"
+#include "../imgui/examples/imgui_impl_dx12.h"
+#include "../imgui/examples/imgui_impl_win32.h"
 
 using namespace std;
 using namespace Microsoft::WRL;

@@ -2,9 +2,9 @@
 
 #include "../include/PBLensFlare.h"
 
-#include "imgui.h"
-#include "examples/imgui_impl_dx12.h"
-#include "examples/imgui_impl_win32.h"
+#include "../../common/imgui/imgui.h"
+#include "../../common/imgui/examples/imgui_impl_dx12.h"
+#include "../../common/imgui/examples/imgui_impl_win32.h"
 
 #include "sstream"
 #include <algorithm>

@@ -99,10 +99,7 @@ copy "$(WindowsSdkDir)Redist\D3D\$(PlatformTarget)\dxil.dll" "$(ProjectDir)dxil.
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\common\Application.h" />
-    <ClInclude Include="..\common\AppUtil.h" />
     <ClInclude Include="..\common\d3dx12.h" />
-    <ClInclude Include="..\common\DescriptorManager.h" />
     <ClInclude Include="..\common\imgui\examples\imgui_impl_dx12.h" />
     <ClInclude Include="..\common\imgui\examples\imgui_impl_win32.h" />
     <ClInclude Include="..\common\imgui\imconfig.h" />
@@ -111,7 +108,10 @@ copy "$(WindowsSdkDir)Redist\D3D\$(PlatformTarget)\dxil.dll" "$(ProjectDir)dxil.
     <ClInclude Include="..\common\imgui\imstb_rectpack.h" />
     <ClInclude Include="..\common\imgui\imstb_textedit.h" />
     <ClInclude Include="..\common\imgui\imstb_truetype.h" />
-    <ClInclude Include="..\common\Swapchain.h" />
+    <ClInclude Include="..\common\include\Application.h" />
+    <ClInclude Include="..\common\include\AppUtil.h" />
+    <ClInclude Include="..\common\include\DescriptorManager.h" />
+    <ClInclude Include="..\common\include\Swapchain.h" />
     <ClInclude Include="include\PBLensFlare.h" />
     <ClInclude Include="include\DX12Buffer.h" />
     <ClInclude Include="include\LinearAlgebra.h" />
