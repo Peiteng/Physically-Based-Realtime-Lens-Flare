@@ -7,16 +7,14 @@ necessary external file / code
 - dxil.dll
 - imgui
 
-###Calculation Method of Wave Distribution
-- (Star)Burst Pattern
-Fraunhofer Diffraction
+### Calculation Method of Wave Distribution
+- (Star)Burst Pattern : Fraunhofer Diffraction
 ![burst](https://user-images.githubusercontent.com/65929274/147729251-25154030-9cef-4f07-8895-01fbd01f3513.png)
 
-- Ghost/Ringing Pattern
-Angular Spectrum Method
+- Ghost/Ringing Pattern : Angular Spectrum Method
 ![ghost](https://user-images.githubusercontent.com/65929274/147729265-d0b010c4-6bce-4956-989b-2120d8b62912.png)
 
-###Example
+### Example
 Nikon
 ![flare1](https://user-images.githubusercontent.com/65929274/147655774-db4b6e69-f62e-4125-8450-0f19dfd08407.gif)
 
