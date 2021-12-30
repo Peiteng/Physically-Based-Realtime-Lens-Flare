@@ -10,26 +10,31 @@
 #include <algorithm>
 using namespace std;
 
+#define IMVEC_RED ImVec4(1,0,0,1)
+#define IMVEC_GREEN ImVec4(0,1,0,1)
+#define IMVEC_BLUE ImVec4(0,0,1,1)
+#define IMVEC_YELLOW ImVec4(1,1,0,1)
+
 std::string unit(u32 byte)
 {
-	const u32 kiro = 1024;
+	const u32 KiB = 1024;
 	const std::string unit[4] = {"B", "KB", "MB", "GB"};
 
 	u32 count = 0;
 
-	byte /= kiro;
+	byte /= KiB;
 
 	while (1)
 	{
 		count++;
 
-		if ((u32)(byte / kiro) == 0 || count == 3)
+		if ((u32)(byte / KiB) == 0 || count == 3)
 		{
 			break;
 		}
 		else
 		{
-			byte /= kiro;
+			byte /= KiB;
 		}
 	}
 
@@ -148,8 +153,8 @@ void PBLensFlare::renderHUD()//UI‚Ì•`‰æ
 
 		if (!mFFTEnable)
 		{
-			ImGui::TextColored(ImVec4(1,0,0,1), "Aperture Dust Image Name Is Invalid");
-			ImGui::TextColored(ImVec4(1,0,0,1), "File Must be Exist or Image Size Must be power of 2 and 512 or less");
+			ImGui::TextColored(IMVEC_RED, "Aperture Dust Image Name Is Invalid");
+			ImGui::TextColored(IMVEC_YELLOW, "File Must be Exist or Image Size Must be power of 2 and 512 or less");
 		}
 	}
 	displayParameters();
