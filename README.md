@@ -26,7 +26,7 @@ Lens form is denoted by algebraic equation, so we don't need to specific structu
 
 By executing tracing of bundle, we can calculate intensity of ray. For improving in quality, we take average of its surrounding neighbors.
 
-![exp1](https://user-images.githubusercontent.com/65929274/147754174-c00ac29f-8663-4d5a-b15f-be6f7b0d443a.png)
+<img src="https://render.githubusercontent.com/render/math?math=I=\frac{S_{\text{base}}}{\sum_{n=0}^{3}S_{n}}">
 
 
 ![process3](https://user-images.githubusercontent.com/65929274/147752267-cd979149-b8ca-455e-9527-6689375d1d6f.png)
