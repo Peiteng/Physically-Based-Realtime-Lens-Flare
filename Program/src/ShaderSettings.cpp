@@ -16,6 +16,7 @@ void PBLensFlare::setupComputePipeline()
 		mShaderSettingComputeTbl[setting].nameAtPipeline = "traceRay";
 		mShaderSettingComputeTbl[setting].shaderMacro.push_back(Shader::DefineMacro{ L"NUM_GROUPS", to_wstring(mLensFlareComputeInformation.NUM_GROUPS) });
 		mShaderSettingComputeTbl[setting].shaderMacro.push_back(Shader::DefineMacro{ L"NUM_THREADS", to_wstring(mLensFlareComputeInformation.NUM_THREADS) });
+		mShaderSettingComputeTbl[setting].shaderMacro.push_back(Shader::DefineMacro{ L"NUM_GHOSTS", to_wstring(mLensDescription.NumGhosts) });
 		mShaderSettingComputeTbl[setting].shaderMacro.push_back(Shader::DefineMacro{ L"GRID_DIV", to_wstring(mLensFlareComputeInformation.GRID_DIV) });
 		mShaderSettingComputeTbl[setting].shaderMacro.push_back(Shader::DefineMacro{ L"PI", to_wstring(PROJECT_PI) });
 		mShaderSettingComputeTbl[setting].shaderMacro.push_back(Shader::DefineMacro{ L"SAMPLE_LAMBDA_NUM", to_wstring(mLensFlareComputeInformation.SAMPLE_LAMBDA_NUM) });
@@ -33,6 +34,7 @@ void PBLensFlare::setupComputePipeline()
 		mShaderSettingComputeTbl[setting].nameAtPipeline = "traceRayAR";
 		mShaderSettingComputeTbl[setting].shaderMacro.push_back(Shader::DefineMacro{ L"NUM_GROUPS", to_wstring(mLensFlareComputeInformation.NUM_GROUPS) });
 		mShaderSettingComputeTbl[setting].shaderMacro.push_back(Shader::DefineMacro{ L"NUM_THREADS", to_wstring(mLensFlareComputeInformation.NUM_THREADS) });
+		mShaderSettingComputeTbl[setting].shaderMacro.push_back(Shader::DefineMacro{ L"NUM_GHOSTS", to_wstring(mLensDescription.NumGhosts) });
 		mShaderSettingComputeTbl[setting].shaderMacro.push_back(Shader::DefineMacro{ L"GRID_DIV", to_wstring(mLensFlareComputeInformation.GRID_DIV) });
 		mShaderSettingComputeTbl[setting].shaderMacro.push_back(Shader::DefineMacro{ L"PI", to_wstring(PROJECT_PI) });
 		mShaderSettingComputeTbl[setting].shaderMacro.push_back(Shader::DefineMacro{ L"SAMPLE_LAMBDA_NUM", to_wstring(mLensFlareComputeInformation.SAMPLE_LAMBDA_NUM) });
@@ -414,7 +416,9 @@ void PBLensFlare::setupGraphicsPipeline()
 		mShaderSettingGraphicsTbl[setting].shaderEntryPointPS = L"rayTracePS";
 		mShaderSettingGraphicsTbl[setting].nameAtPipeline = "addGhosts";
 		mShaderSettingGraphicsTbl[setting].shaderMacroVS.push_back(Shader::DefineMacro{ L"GRID_DIV", to_wstring(mLensFlareComputeInformation.GRID_DIV) });
+		mShaderSettingGraphicsTbl[setting].shaderMacroVS.push_back(Shader::DefineMacro{ L"SAMPLE_LAMBDA_NUM", to_wstring(mLensFlareComputeInformation.SAMPLE_LAMBDA_NUM) });
 		mShaderSettingGraphicsTbl[setting].shaderMacroPS.push_back(Shader::DefineMacro{ L"GRID_DIV", to_wstring(mLensFlareComputeInformation.GRID_DIV) });
+		mShaderSettingGraphicsTbl[setting].shaderMacroPS.push_back(Shader::DefineMacro{ L"SAMPLE_LAMBDA_NUM", to_wstring(mLensFlareComputeInformation.SAMPLE_LAMBDA_NUM) });
 		mShaderSettingGraphicsTbl[setting].descriptorKeys.push_back("computeConstants");
 		mShaderSettingGraphicsTbl[setting].descriptorKeys.push_back("traceResult");
 		mShaderSettingGraphicsTbl[setting].descriptorKeys.push_back("texture");

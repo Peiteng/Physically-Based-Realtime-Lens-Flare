@@ -3,6 +3,16 @@
     float4 pos : SV_POSITION;
     float4 drawInfo : TEXCOORD0;
     float4 coordinates : TEXCOORD1;
+    float4 colorR : TEXCOORD2;
+    float4 colorG : TEXCOORD3;
+    float4 colorB : TEXCOORD4;
+};
+
+struct InfoPerLambda
+{
+    float4 pos : SV_POSITION;
+    float4 drawInfo : TEXCOORD0;
+    float4 coordinates : TEXCOORD1;
     float4 reflectance : TEXCOORD2;
 };
 
@@ -311,7 +321,7 @@ float GetRegion(int2 rayID2D, int offsetAtBuffer)
     return isnan(intensity) ? 0.f : intensity;
 }
 
-PSInput Trace(float2 origin, float wavelength, int2 bounces)
+InfoPerLambda Trace(float2 origin, float wavelength, int2 bounces)
 {
     float3 originPos = float3(origin * computeConstants.spread, 1000.f);
     
@@ -323,13 +333,46 @@ PSInput Trace(float2 origin, float wavelength, int2 bounces)
     Ray ray = { originPos, computeConstants.lightDir.xyz, float4(0.xxx, 1) };
     computeTracedRay(ray, wavelength, bounces);
 
-    PSInput result;
+    InfoPerLambda result;
     result.pos = float4(ray.pos.xyz, 1.f);
     result.coordinates = float4(origin, ray.drawInfo.xy);
     result.drawInfo = ray.drawInfo;
     result.reflectance = float4(0.xxx, ray.drawInfo.a);
 
     return result;
+}
+
+float3 lambda2RGB(float lambda)
+{
+    float3 colRGB;
+
+    if (lambda < 350.0)
+        colRGB = float3(0.5, 0.0, 1.0);
+    else if ((lambda >= 350.0) && (lambda < 440.0))
+        colRGB = float3((440.0 - lambda) / 90.0, 0.0, 1.0);
+    else if ((lambda >= 440.0) && (lambda <= 490.0))
+        colRGB = float3(0.0, (lambda - 440.0) / 50.0, 1.0);
+    else if ((lambda >= 490.0) && (lambda < 510.0))
+        colRGB = float3(0.0, 1.0, (-(lambda - 510.0)) / 20.0);
+    else if ((lambda >= 510.0) && (lambda < 580.0))
+        colRGB = float3((lambda - 510.0) / 70.0, 1.0, 0.0);
+    else if ((lambda >= 580.0) && (lambda < 645.0))
+        colRGB = float3(1.0, (-(lambda - 645.0)) / 65.0, 0.0);
+    else
+        colRGB = float3(1.0, 0.0, 0.0);
+
+    if (lambda < 350.0)
+        colRGB *= 0.3;
+    else if ((lambda >= 350.0) && (lambda < 420.0))
+        colRGB *= 0.3 + (0.7 * ((lambda - 350.0) / 70.0));
+    else if ((lambda >= 420.0) && (lambda <= 700.0))
+        colRGB *= 1.0;
+    else if ((lambda > 700.0) && (lambda <= 780.0))
+        colRGB *= 0.3 + (0.7 * ((780.0 - lambda) / 80.0));
+    else
+        colRGB *= 0.3;
+
+    return colRGB;
 }
 
 [numthreads(NUM_THREADS, NUM_THREADS, 1)]
@@ -347,13 +390,30 @@ void rayTraceCS(int3 groupID : SV_GroupID, uint3 groupThreadID : SV_GroupThreadI
     const float lambdaVio = 380;
     const float range = lambdaRed - lambdaVio;
     
+    int COLOR_ID = groupID.z;
+    const float sampleLambda = lambdaRed - COLOR_ID * range / (float) (SAMPLE_LAMBDA_NUM);
+    
     int2 bounces = int2(ghostData[ghostID].bounce1, ghostData[ghostID].bounce2);
-    PSInput result = Trace(ray2DPos, lambdaRed - groupID.z * range / (float) (SAMPLE_LAMBDA_NUM), bounces);
+    InfoPerLambda result = Trace(ray2DPos, sampleLambda, bounces);
 	
     uint ID = GetOffsetAtOneGhost(rayID2D) + ghostOffset;
+    
+    float3 sampleLambdaCol = lambda2RGB(sampleLambda);
     
     traceResult[ID].pos = result.pos;
     traceResult[ID].drawInfo = float4(result.drawInfo.rgb, GetRegion(rayID2D, ghostOffset));
     traceResult[ID].coordinates = result.coordinates;
-    traceResult[ID].reflectance[groupID.z] = result.reflectance.a;
+    
+    if (COLOR_ID == 0)
+    {
+        traceResult[ID].colorR.rgb = result.reflectance.a * sampleLambdaCol;
+    }
+    else if (COLOR_ID == 1)
+    {
+        traceResult[ID].colorG.rgb = result.reflectance.a * sampleLambdaCol;
+    }
+    else if (COLOR_ID == 2)
+    {
+        traceResult[ID].colorB.rgb = result.reflectance.a * sampleLambdaCol;
+    }
 }

@@ -40,7 +40,7 @@ void raiseValue(uint3 dispatchThreadID : SV_DispatchThreadID)
     imaginaryDistributionDestination[ID] = float4(inputI, 1.0);
 }
 
-float3 lambdalRGB(float lambda)
+float3 lambda2RGB(float lambda)
 {
     float3 colRGB;
 
@@ -109,7 +109,7 @@ void lambdaIntegral(uint3 dispatchThreadID : SV_DispatchThreadID)
         float cr = 1 / lambda;
         cr *= cr;
         
-        result += (cr * realDistributionSource.SampleLevel(imageSampler, scaled_uv, 0).r * !clamped * lerp(1.f, lambdalRGB(lambda), 0.75f));
+        result += (cr * realDistributionSource.SampleLevel(imageSampler, scaled_uv, 0).r * !clamped * lerp(1.f, lambda2RGB(lambda), 0.75f));
     }
 
     result /= (float) num_steps;
@@ -157,7 +157,7 @@ void burstFilter(uint3 dispatchThreadID : SV_DispatchThreadID)
         float2 rotatedUV = Rotate(uv + float2(cos(phi), sin(phi)) * 0.01f, rotateAngle) + 0.5f;
 
         float3 starburst = realDistributionSource.SampleLevel(imageSampler, rotatedUV, 0).rgb * !Clamped(rotatedUV);
-        result += starburst * lerp(lambdalRGB(lerp(lambdaVio, lambdaRed, n)), 1.f, 0.5f);
+        result += starburst * lerp(lambda2RGB(lerp(lambdaVio, lambdaRed, n)), 1.f, 0.5f);
     }
 
     result /= (float) num_steps;

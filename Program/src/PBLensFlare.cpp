@@ -39,7 +39,7 @@ PBLensFlare::PBLensFlare() :
 	mPosYSave(0.51),
 	mGlarelambdasamplenum(50),
 
-	mUseAR(true),
+	mUseAR(false),
 
 	mExecuteTimeMS(0),
 

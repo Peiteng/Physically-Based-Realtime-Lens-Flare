@@ -3,7 +3,9 @@ struct PSInput
     float4 pos : SV_POSITION;
     float4 drawInfo : TEXCOORD0;
     float4 coordinates : TEXCOORD1;
-    float4 reflectance : TEXCOORD2;
+    float4 colorR : TEXCOORD2;
+    float4 colorG : TEXCOORD3;
+    float4 colorB : TEXCOORD4;
 };
 
 struct CBuffer
@@ -99,7 +101,9 @@ float4 rayTracePS(in PSInput input) : SV_Target
     #elif UV
     v = float3(texUV, 0);
     #else
-    v = tonemappedColor(alpha * input.reflectance.xyz * computeConstants.color * aperture);
+    float3 rayColor = input.colorR.xyz + input.colorG.xyz + input.colorB.xyz;
+    rayColor /= (float) (SAMPLE_LAMBDA_NUM);
+    v = tonemappedColor(alpha * rayColor * computeConstants.color * aperture);
     #endif
     return float4(v, 1.f);
 }

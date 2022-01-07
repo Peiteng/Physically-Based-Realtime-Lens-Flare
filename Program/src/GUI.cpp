@@ -225,7 +225,7 @@ void PBLensFlare::displayParameters()
 			if (ImGui::CollapsingHeader("GHOST"))
 			{
 				ImGui::SliderFloat("Scale", &mGhostScale, 0, 0.1);
-				ImGui::SliderFloat("Intensity Ratio", &mGhostIntensityRatio, 0.0f, 2000.0f);
+				ImGui::SliderFloat("Intensity Ratio", &mGhostIntensityRatio, 0.0f, 10000.0f);
 			}
 			if (ImGui::CollapsingHeader("BURST"))
 			{

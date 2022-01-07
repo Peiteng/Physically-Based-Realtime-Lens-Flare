@@ -62,7 +62,9 @@ private:
 		FLOAT4 pos;
 		FLOAT4 drawInfo;
 		FLOAT4 coordinates;
-		FLOAT4 reflectance; 
+		FLOAT4 colorR; 
+		FLOAT4 colorG;
+		FLOAT4 colorB;
 	};
 
 	enum GridNum
