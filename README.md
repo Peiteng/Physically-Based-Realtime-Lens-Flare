@@ -1,6 +1,9 @@
 # Physically-Based-Lens-Flare
 Realtime Lens Flare Rendering with Ray-Tracing and Lens Data
 
+![GIF](https://user-images.githubusercontent.com/65929274/148648293-9785c3dd-b1a0-480f-8e3f-1acc133e07cc.gif)
+
+
 necessary external file / code
 - d3dx12.h
 - dxcompiler.dll
@@ -34,10 +37,10 @@ By executing tracing of bundle, we can calculate intensity of ray. For improving
 
 ### Example
 Nikon
-![nikon](https://user-images.githubusercontent.com/65929274/148566646-64e4e430-d3b5-4e91-b9d0-bb14d0376fd7.png)
+![nikon](https://user-images.githubusercontent.com/65929274/148648214-903d1502-e855-458d-8479-55402c00e74f.png)
 
 Angenieux
-![angenieux](https://user-images.githubusercontent.com/65929274/148566701-6e538d2d-0df0-4027-a9cb-19ac18c7a847.png)
+![angenieux](https://user-images.githubusercontent.com/65929274/148648219-39a4a3bd-c6b1-40f1-b03c-a8ab5414acbc.png)
 
 Canon
-![canon](https://user-images.githubusercontent.com/65929274/148566743-07f40451-f518-442b-858f-ada39f72556f.png)
+![canon](https://user-images.githubusercontent.com/65929274/148648226-4e4da6a0-ec68-4f29-975c-6a2be0524b6e.png)

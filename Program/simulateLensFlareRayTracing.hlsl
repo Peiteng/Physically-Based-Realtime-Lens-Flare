@@ -2,10 +2,12 @@
 {
     float4 pos : SV_POSITION;
     float4 drawInfo : TEXCOORD0;
-    float4 coordinates : TEXCOORD1;
-    float4 colorR : TEXCOORD2;
-    float4 colorG : TEXCOORD3;
-    float4 colorB : TEXCOORD4;
+    float4 coordinatesR : TEXCOORD1;
+    float4 coordinatesG : TEXCOORD2;
+    float4 coordinatesB : TEXCOORD3;
+    float4 colorR : TEXCOORD4;
+    float4 colorG : TEXCOORD5;
+    float4 colorB : TEXCOORD6;
 };
 
 struct InfoPerLambda
@@ -168,6 +170,26 @@ void makeRayInvisible(inout Ray r)
     r.drawInfo.a = 0; //mark up invalid ray
 }
 
+float sqrtNtime(float val, float N)
+{
+    for (int i = 0; i < N; i++)
+    {
+        val = sqrt(val);
+    }
+    return val;
+}
+
+void refIndexCorrect(inout float n, float lambda)
+{
+    const float lambda0 = (LAMBDA_RED + LAMBDA_BLUE) / 2;
+    float coef = sqrtNtime(lambda0 / lambda, 6); //if lambda smaler, n is larger
+            
+    if (n != 1)
+    {
+        n *= coef;
+    }
+}
+
 void computeTracedRay(inout Ray r, float lambda, int2 bounces)
 {
     const int MAX_LensID_Diff = bounces.x + (bounces.x - bounces.y) + (computeConstants.numInterfaces - bounces.y) - 1;
@@ -197,7 +219,7 @@ void computeTracedRay(inout Ray r, float lambda, int2 bounces)
         }
 
         Intersection i = getIntersectionInfo(r, lensInterface[currentLensID]);
-
+        
 		[branch]
         if (!i.hit)
         {
@@ -235,7 +257,16 @@ void computeTracedRay(inout Ray r, float lambda, int2 bounces)
         [branch]
         if (!isReflect)
         { // refraction
-            r.dir = refract(r.dir, i.norm, n0 / n2);
+            
+            float refraction_nIN = n0;
+            float refraction_nOUT = n2;
+            
+            {//ref idx correction by lambda
+                refIndexCorrect(refraction_nIN, lambda);
+                refIndexCorrect(refraction_nOUT, lambda);
+            }
+            
+            r.dir = refract(r.dir, i.norm, refraction_nIN / refraction_nOUT);
 			[branch]
             if (length(r.dir) < ep)//in the theory, we must use "equal", but, in this case we ease condition because of affection 
             {
@@ -385,13 +416,11 @@ void rayTraceCS(int3 groupID : SV_GroupID, uint3 groupThreadID : SV_GroupThreadI
     //offset at ghost
     int2 rayID2D = groupThreadID.xy + (groupID.xy % NUM_GROUPS) * NUM_THREADS; //(0～GRID_DIV - 1, 0～GRID_DIV - 1)
     float2 ray2DPos = (rayID2D / float(GRID_DIV - 1) - 0.5f) * 2.f; //-1～1
-
-    const float lambdaRed = 700;
-    const float lambdaVio = 380;
-    const float range = lambdaRed - lambdaVio;
+    
+    const float range = LAMBDA_RED - LAMBDA_BLUE;
     
     int COLOR_ID = groupID.z;
-    const float sampleLambda = lambdaRed - COLOR_ID * range / (float) (SAMPLE_LAMBDA_NUM);
+    const float sampleLambda = LAMBDA_RED - COLOR_ID * range / (float) (SAMPLE_LAMBDA_NUM);
     
     int2 bounces = int2(ghostData[ghostID].bounce1, ghostData[ghostID].bounce2);
     InfoPerLambda result = Trace(ray2DPos, sampleLambda, bounces);
@@ -399,21 +428,22 @@ void rayTraceCS(int3 groupID : SV_GroupID, uint3 groupThreadID : SV_GroupThreadI
     uint ID = GetOffsetAtOneGhost(rayID2D) + ghostOffset;
     
     float3 sampleLambdaCol = lambda2RGB(sampleLambda);
-    
-    traceResult[ID].pos = result.pos;
-    traceResult[ID].drawInfo = float4(result.drawInfo.rgb, GetRegion(rayID2D, ghostOffset));
-    traceResult[ID].coordinates = result.coordinates;
-    
+
     if (COLOR_ID == 0)
     {
+        traceResult[ID].coordinatesR = result.coordinates;
         traceResult[ID].colorR.rgb = result.reflectance.a * sampleLambdaCol;
     }
     else if (COLOR_ID == 1)
     {
+        traceResult[ID].coordinatesG = result.coordinates;
         traceResult[ID].colorG.rgb = result.reflectance.a * sampleLambdaCol;
     }
     else if (COLOR_ID == 2)
     {
+        traceResult[ID].pos = result.pos;
+        traceResult[ID].drawInfo = float4(result.drawInfo.rgb, GetRegion(rayID2D, ghostOffset));
+        traceResult[ID].coordinatesB = result.coordinates;
         traceResult[ID].colorB.rgb = result.reflectance.a * sampleLambdaCol;
     }
 }

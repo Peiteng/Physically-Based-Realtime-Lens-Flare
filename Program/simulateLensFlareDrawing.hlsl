@@ -2,10 +2,12 @@ struct PSInput
 {
     float4 pos : SV_POSITION;
     float4 drawInfo : TEXCOORD0;
-    float4 coordinates : TEXCOORD1;
-    float4 colorR : TEXCOORD2;
-    float4 colorG : TEXCOORD3;
-    float4 colorB : TEXCOORD4;
+    float4 coordinatesR : TEXCOORD1;
+    float4 coordinatesG : TEXCOORD2;
+    float4 coordinatesB : TEXCOORD3;
+    float4 colorR : TEXCOORD4;
+    float4 colorG : TEXCOORD5;
+    float4 colorB : TEXCOORD6;
 };
 
 struct CBuffer
@@ -81,17 +83,29 @@ float4 rayTracePS(in PSInput input) : SV_Target
         discard;
     }
     
-    float2 gridPos = input.coordinates.xy;
-    float2 texPos = input.coordinates.zw;
-    float2 texUV = (texPos + 1.f) / 2.f;
-    if (isOutUV(texUV))
+    float2 gridPosR = input.coordinatesR.xy;
+    float2 gridPosG = input.coordinatesR.xy;
+    float2 gridPosB = input.coordinatesR.xy;
+    
+    float2 texPosR = input.coordinatesR.zw;
+    float2 texPosG = input.coordinatesG.zw;
+    float2 texPosB = input.coordinatesB.zw;
+    
+    float2 texUVR = (texPosR + 1.f) / 2.f;
+    float2 texUVG = (texPosG + 1.f) / 2.f;
+    float2 texUVB = (texPosB + 1.f) / 2.f;
+    
+    if (isOutUV(texUVR) && isOutUV(texUVG) && isOutUV(texUVB))
         discard;
     
-    float aperture = texture.Sample(imageSampler, texUV);
-    if (aperture == 0.f)
-        discard;
+    float apertureR = texture.Sample(imageSampler, texUVR);
+    float apertureG = texture.Sample(imageSampler, texUVG);
+    float apertureB = texture.Sample(imageSampler, texUVB);
     
-    float alpha = drawInfo.w * vignetting(gridPos, texUV) * computeConstants.intensity;
+    if (apertureR == 0.f && apertureG == 0.f && apertureB == 0.f)
+            discard;
+    
+    float alpha = drawInfo.w * (vignetting(gridPosR, texUVR) + vignetting(gridPosG, texUVG) + vignetting(gridPosB, texUVB)) / (float) (SAMPLE_LAMBDA_NUM) * computeConstants.intensity;
     if (alpha == 0.f)
         discard;
 
@@ -99,11 +113,11 @@ float4 rayTracePS(in PSInput input) : SV_Target
     #ifdef WIRE_FRAME
     v = 0.1;
     #elif UV
-    v = float3(texUV, 0);
+    v = float3(texUVR, 0);
     #else
-    float3 rayColor = input.colorR.xyz + input.colorG.xyz + input.colorB.xyz;
-    rayColor /= (float) (SAMPLE_LAMBDA_NUM);
-    v = tonemappedColor(alpha * rayColor * computeConstants.color * aperture);
+    float3 col = (apertureR * input.colorR.xyz + apertureG * input.colorG.xyz + apertureB * input.colorB.xyz);
+    col /= (float) (SAMPLE_LAMBDA_NUM);
+    v = tonemappedColor(alpha * computeConstants.color * col);
     #endif
     return float4(v, 1.f);
 }

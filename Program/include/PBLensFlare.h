@@ -61,7 +61,9 @@ private:
 	{
 		FLOAT4 pos;
 		FLOAT4 drawInfo;
-		FLOAT4 coordinates;
+		FLOAT4 coordinatesR;
+		FLOAT4 coordinatesG;
+		FLOAT4 coordinatesB;
 		FLOAT4 colorR; 
 		FLOAT4 colorG;
 		FLOAT4 colorB;
@@ -73,8 +75,7 @@ private:
 		GridNum_8x8,
 		GridNum_16x16,
 		GridNum_32x32,
-		GridNum_64x64,
-		GridNum_128x128
+		GridNum_64x64
 	};
 
 	struct LensFlareAppInformationForCompute
@@ -84,6 +85,8 @@ private:
 		s32 NUM_GROUPS = GRID_DIV / NUM_THREADS;
 		s32 NUM_VERTICES_PER_BUNDLES = (GRID_DIV - 1) * (GRID_DIV - 1);
 		s32 SAMPLE_LAMBDA_NUM = 3;
+		f32 LAMBDA_RED = 700;
+		f32 LAMBDA_BLUE = 380;
 	};
 
 	struct PatentFormat {

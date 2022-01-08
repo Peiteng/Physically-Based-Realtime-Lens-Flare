@@ -157,10 +157,6 @@ void PBLensFlare::updateComputeInfo()
 		mLensFlareComputeInformation.GRID_DIV = 64;
 		mLensFlareComputeInformation.NUM_THREADS = 16;
 		break;
-	case GridNum_128x128:
-		mLensFlareComputeInformation.GRID_DIV = 128;
-		mLensFlareComputeInformation.NUM_THREADS = 16;
-		break;
 	default:
 		mLensFlareComputeInformation.GRID_DIV = 16;
 		mLensFlareComputeInformation.NUM_THREADS = 16;
