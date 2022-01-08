@@ -1,5 +1,5 @@
 # Physically-Based-Lens-Flare
-Lens Flare Rendering with Ray-Tracing and Lens Data
+Realtime Lens Flare Rendering with Ray-Tracing and Lens Data
 
 necessary external file / code
 - d3dx12.h
