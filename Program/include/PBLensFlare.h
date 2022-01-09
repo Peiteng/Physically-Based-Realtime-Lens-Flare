@@ -8,6 +8,7 @@
 #include <pix3.h>
 
 #define MAX_DUST_IMAGE_SIZE 512
+#define LAMBDA_NUM = 3
 
 class PBLensFlare : public Application {
 public:
@@ -61,12 +62,8 @@ private:
 	{
 		FLOAT4 pos;
 		FLOAT4 drawInfo;
-		FLOAT4 coordinatesR;
-		FLOAT4 coordinatesG;
-		FLOAT4 coordinatesB;
-		FLOAT4 colorR; 
-		FLOAT4 colorG;
-		FLOAT4 colorB;
+		FLOAT4 coordinates[3];
+		FLOAT4 color[3];
 	};
 
 	enum GridNum

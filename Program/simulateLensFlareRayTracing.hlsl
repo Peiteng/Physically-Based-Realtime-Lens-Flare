@@ -2,12 +2,8 @@
 {
     float4 pos : SV_POSITION;
     float4 drawInfo : TEXCOORD0;
-    float4 coordinatesR : TEXCOORD1;
-    float4 coordinatesG : TEXCOORD2;
-    float4 coordinatesB : TEXCOORD3;
-    float4 colorR : TEXCOORD4;
-    float4 colorG : TEXCOORD5;
-    float4 colorB : TEXCOORD6;
+    float4 coordinates[SAMPLE_LAMBDA_NUM] : WORLD;
+    float4 color[SAMPLE_LAMBDA_NUM] : VIEW;
 };
 
 struct InfoPerLambda
@@ -431,19 +427,9 @@ void rayTraceCS(int3 groupID : SV_GroupID, uint3 groupThreadID : SV_GroupThreadI
 
     if (COLOR_ID == 0)
     {
-        traceResult[ID].coordinatesR = result.coordinates;
-        traceResult[ID].colorR.rgb = result.reflectance.a * sampleLambdaCol;
-    }
-    else if (COLOR_ID == 1)
-    {
-        traceResult[ID].coordinatesG = result.coordinates;
-        traceResult[ID].colorG.rgb = result.reflectance.a * sampleLambdaCol;
-    }
-    else if (COLOR_ID == 2)
-    {
         traceResult[ID].pos = result.pos;
         traceResult[ID].drawInfo = float4(result.drawInfo.rgb, GetRegion(rayID2D, ghostOffset));
-        traceResult[ID].coordinatesB = result.coordinates;
-        traceResult[ID].colorB.rgb = result.reflectance.a * sampleLambdaCol;
     }
+    traceResult[ID].coordinates[COLOR_ID] = result.coordinates;
+    traceResult[ID].color[COLOR_ID].rgb = result.reflectance.a * sampleLambdaCol;
 }

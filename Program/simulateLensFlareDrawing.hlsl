@@ -2,12 +2,8 @@ struct PSInput
 {
     float4 pos : SV_POSITION;
     float4 drawInfo : TEXCOORD0;
-    float4 coordinatesR : TEXCOORD1;
-    float4 coordinatesG : TEXCOORD2;
-    float4 coordinatesB : TEXCOORD3;
-    float4 colorR : TEXCOORD4;
-    float4 colorG : TEXCOORD5;
-    float4 colorB : TEXCOORD6;
+    float4 coordinates[SAMPLE_LAMBDA_NUM] : WORLD;
+    float4 color[SAMPLE_LAMBDA_NUM] : VIEW;
 };
 
 struct CBuffer
@@ -83,29 +79,65 @@ float4 rayTracePS(in PSInput input) : SV_Target
         discard;
     }
     
-    float2 gridPosR = input.coordinatesR.xy;
-    float2 gridPosG = input.coordinatesR.xy;
-    float2 gridPosB = input.coordinatesR.xy;
+    float2 gridPos[SAMPLE_LAMBDA_NUM];
+    float2 texPos[SAMPLE_LAMBDA_NUM];
+    float2 texUV[SAMPLE_LAMBDA_NUM];
     
-    float2 texPosR = input.coordinatesR.zw;
-    float2 texPosG = input.coordinatesG.zw;
-    float2 texPosB = input.coordinatesB.zw;
+    int i = 0;
     
-    float2 texUVR = (texPosR + 1.f) / 2.f;
-    float2 texUVG = (texPosG + 1.f) / 2.f;
-    float2 texUVB = (texPosB + 1.f) / 2.f;
+     [unroll]
+    for (i = 0; i < SAMPLE_LAMBDA_NUM; i++)
+    {
+        gridPos[i] = input.coordinates[i].xy;
+        texPos[i] = input.coordinates[i].zw;
+        texUV[i] = (texPos[i] + 1.f) / 2.f;
+    }
     
-    if (isOutUV(texUVR) && isOutUV(texUVG) && isOutUV(texUVB))
-        discard;
-    
-    float apertureR = texture.Sample(imageSampler, texUVR);
-    float apertureG = texture.Sample(imageSampler, texUVG);
-    float apertureB = texture.Sample(imageSampler, texUVB);
-    
-    if (apertureR == 0.f && apertureG == 0.f && apertureB == 0.f)
+    {
+        int uvDiscardCount = 0;
+         [unroll]
+        for (i = 0; i < SAMPLE_LAMBDA_NUM; i++)
+        {
+            if (isOutUV(texUV[i]))
+            {
+                uvDiscardCount++;
+            }
+        }
+         [branch]
+        if (uvDiscardCount == SAMPLE_LAMBDA_NUM)
             discard;
+    }
     
-    float alpha = drawInfo.w * (vignetting(gridPosR, texUVR) + vignetting(gridPosG, texUVG) + vignetting(gridPosB, texUVB)) / (float) (SAMPLE_LAMBDA_NUM) * computeConstants.intensity;
+    float aperture[SAMPLE_LAMBDA_NUM];
+    {
+        int apertureDiscardCount = 0;
+         [unroll]
+        for (i = 0; i < SAMPLE_LAMBDA_NUM; i++)
+        {
+            aperture[i] = texture.Sample(imageSampler, texUV[i]);
+            if (aperture[i] == 0)
+            {
+                apertureDiscardCount++;
+            }
+        }
+        [branch]
+        if (apertureDiscardCount == SAMPLE_LAMBDA_NUM)
+            discard;
+    }
+    
+    float vignet = 0;
+    {
+         [unroll]
+        for (i = 0; i < SAMPLE_LAMBDA_NUM; i++)
+        {
+            vignet += vignetting(gridPos[i], texUV[i]);
+        }
+        vignet /= (float) (SAMPLE_LAMBDA_NUM);
+    }
+    
+    float alpha = drawInfo.w * vignet * computeConstants.intensity;
+    
+    [branch]
     if (alpha == 0.f)
         discard;
 
@@ -113,9 +145,15 @@ float4 rayTracePS(in PSInput input) : SV_Target
     #ifdef WIRE_FRAME
     v = 0.1;
     #elif UV
-    v = float3(texUVR, 0);
+    v = float3(texUV[0], 0);
     #else
-    float3 col = (apertureR * input.colorR.xyz + apertureG * input.colorG.xyz + apertureB * input.colorB.xyz);
+    float3 col = 0;
+    
+    [unroll]
+    for (i = 0; i < SAMPLE_LAMBDA_NUM; i++)
+    {
+        col += aperture[i] * input.color[i].rgb;
+    }
     col /= (float) (SAMPLE_LAMBDA_NUM);
     v = tonemappedColor(alpha * computeConstants.color * col);
     #endif
