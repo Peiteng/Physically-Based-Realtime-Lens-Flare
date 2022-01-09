@@ -3,8 +3,15 @@ Realtime Lens Flare Rendering with Ray-Tracing and Lens Data
 
 ![GIF](https://user-images.githubusercontent.com/65929274/148648293-9785c3dd-b1a0-480f-8e3f-1acc133e07cc.gif)
 
+### Task
+- [x] chromatic aberration
+- [x] non-linear ghost deformation 
+- [ ] performance optimization
 
-necessary external file / code
+### Graphics API
+DirectX12
+
+### Necessary External File / Code
 - d3dx12.h
 - dxcompiler.dll
 - dxil.dll
