@@ -110,41 +110,61 @@ void PBLensFlare::onSizeChanged(UINT width, UINT height, bool isMinimized)
 	mScissorRect.bottom = mHeight;
 }
 
-void PBLensFlare::renderHUD()//UI‚Ì•`‰æ
+void PBLensFlare::renderHUD()
 {
 	ImGui_ImplDX12_NewFrame();
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
 
 	auto milisec = 1000.0f / ImGui::GetIO().Framerate;
-	ImGui::Begin("Information");
+	ImGui::Begin("Information", nullptr, ImGuiWindowFlags_MenuBar);
+
+	if (ImGui::BeginMenuBar()) {
+		if (ImGui::BeginMenu("Action"))
+		{
+			if (ImGui::MenuItem("Shader Recompile")) {
+				mRecompile = true;
+				mTraceRequired = true;
+			}
+			if (ImGui::MenuItem("Source Image Update")) {
+				mImageUpdate = true;
+				mGhostKernelRegenerate = true;
+				mBurstKernelRegenerate = true;
+			}
+			ImGui::EndMenu();
+		}
+		ImGui::EndMenuBar();
+	}
+
 	ImGui::Text("ScreenSize: W %d px   H %d px", mWidth, mHeight);
 	ImGui::Text("Framerate: %.3f fps (%.3f ms)", ImGui::GetIO().Framerate, milisec);
-	ImGui::Text("GridNum: %d x %d", mLensFlareComputeInformation.GRID_DIV, mLensFlareComputeInformation.GRID_DIV);
-	ImGui::Text("GhostNum: %d", mLensDescription.NumGhosts);
-	ImGui::Text("VertexNum: %d", mLensDescription.NumGhosts * mLensFlareComputeInformation.GRID_DIV * mLensFlareComputeInformation.GRID_DIV);
+
+	if (ImGui::CollapsingHeader("Compute Infomation"))
+	{
+		ImGui::Text("GridNum: %d x %d", mLensFlareComputeInformation.GRID_DIV, mLensFlareComputeInformation.GRID_DIV);
+		ImGui::Text("GhostNum: %d", mLensDescription.NumGhosts);
+		ImGui::Text("VertexNum: %d", mLensDescription.NumGhosts * mLensFlareComputeInformation.GRID_DIV * mLensFlareComputeInformation.GRID_DIV);
+		ImGui::Text("SampledLambdaNum: %d(From %.0f nm to %.f nm)", mLensFlareComputeInformation.SAMPLE_LAMBDA_NUM, mLensFlareComputeInformation.LAMBDA_RED, mLensFlareComputeInformation.LAMBDA_BLUE);
+	}
+
 	u32 vertexByte = mLensDescription.NumGhosts * mLensFlareComputeInformation.GRID_DIV * mLensFlareComputeInformation.GRID_DIV * sizeof(vec3);
 	u32 indexByte = mLensDescription.NumGhosts * (mLensFlareComputeInformation.GRID_DIV - 1) * (mLensFlareComputeInformation.GRID_DIV - 1) * 6 * sizeof(u32);
 	u32 componentByte = mLensDescription.LensComponents.size() * sizeof(PatentFormat);
 	u32 interfaceByte = mLensDescription.LensInterface.size() * sizeof(LensInterface);
 	u32 ghostByte = mLensDescription.GhostData.size() * sizeof(GhostData);
-	ImGui::Text("Vertex Usage: %s", unit(vertexByte).c_str());
-	ImGui::Text("Index Usage: %s", unit(indexByte).c_str());
-	ImGui::Text("Component Usage: %s", unit(componentByte).c_str());
-	ImGui::Text("Interface Usage: %s", unit(interfaceByte).c_str());
-	ImGui::Text("Ghost Bounce Usage: %s", unit(ghostByte).c_str());
+
+	if (ImGui::CollapsingHeader("Memory Usage"))
+	{
+		ImGui::Text("Vertex Usage: %s", unit(vertexByte).c_str());
+		ImGui::Text("Index Usage: %s", unit(indexByte).c_str());
+		ImGui::Text("Component Usage: %s", unit(componentByte).c_str());
+		ImGui::Text("Interface Usage: %s", unit(interfaceByte).c_str());
+		ImGui::Text("Ghost Bounce Usage: %s", unit(ghostByte).c_str());
+	}
+
 	ImGui::Text("Pos: X %f   Y %f", mPosX, mPosY);
 
-	if (ImGui::Button("Shader Recompile")) {
-		mRecompile = true;
-		mTraceRequired = true;
-	}
 
-	if (ImGui::Button("Source Image Update")) {
-		mImageUpdate = true;
-		mGhostKernelRegenerate = true;
-		mBurstKernelRegenerate = true;
-	}
 	ImGui::Spacing();
 
 	if (ImGui::CollapsingHeader("Images [.png]"))

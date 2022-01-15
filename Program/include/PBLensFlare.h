@@ -8,7 +8,9 @@
 #include <pix3.h>
 
 #define MAX_DUST_IMAGE_SIZE 512
-#define LAMBDA_NUM 3
+#define LAMBDA_NUM 5
+#define LAMBDA_MAX 700
+#define LAMBDA_MIN 380
 
 class PBLensFlare : public Application {
 public:
@@ -82,8 +84,8 @@ private:
 		s32 NUM_GROUPS = GRID_DIV / NUM_THREADS;
 		s32 NUM_VERTICES_PER_BUNDLES = (GRID_DIV - 1) * (GRID_DIV - 1);
 		s32 SAMPLE_LAMBDA_NUM = LAMBDA_NUM;
-		f32 LAMBDA_RED = 700;
-		f32 LAMBDA_BLUE = 380;
+		f32 LAMBDA_RED = LAMBDA_MAX;
+		f32 LAMBDA_BLUE = LAMBDA_MIN;
 	};
 
 	struct PatentFormat {

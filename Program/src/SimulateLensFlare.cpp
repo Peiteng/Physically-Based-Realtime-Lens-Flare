@@ -113,6 +113,7 @@ void PBLensFlare::addGhosts(bool wireFrame)
 	mCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	mCommandList->SetPipelineState(mPipelineStateTbl[mShaderSettingGraphicsTbl[pass].nameAtPipeline].Get());
 	mCommandList->DrawIndexedInstanced((unsigned)mLensFlareComputeInformation.NUM_VERTICES_PER_BUNDLES * 3 * 2, mLensDescription.NumGhosts, 0, 0, 0);
+	//mCommandList->DrawIndexedInstanced(1, 1, 0, 0, 0);
 	PIXEndEvent(mCommandList.Get());
 }
 

@@ -1,5 +1,6 @@
 # Physically-Based-Lens-Flare
 Realtime Lens Flare Rendering with Ray-Tracing and Lens Data
+![ExecuteImage](https://user-images.githubusercontent.com/65929274/149625636-41a6a6df-77af-41ec-a7bb-b65a678fb4a8.png)
 
 ![GIF](https://user-images.githubusercontent.com/65929274/148648293-9785c3dd-b1a0-480f-8e3f-1acc133e07cc.gif)
 

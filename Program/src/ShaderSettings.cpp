@@ -427,8 +427,10 @@ void PBLensFlare::setupGraphicsPipeline()
 		mShaderSettingGraphicsTbl[setting].nameAtPipeline = "addGhosts";
 		mShaderSettingGraphicsTbl[setting].shaderMacroVS.push_back(Shader::DefineMacro{ L"GRID_DIV", to_wstring(mLensFlareComputeInformation.GRID_DIV) });
 		mShaderSettingGraphicsTbl[setting].shaderMacroVS.push_back(Shader::DefineMacro{ L"SAMPLE_LAMBDA_NUM", to_wstring(mLensFlareComputeInformation.SAMPLE_LAMBDA_NUM) });
+		mShaderSettingGraphicsTbl[setting].shaderMacroVS.push_back(Shader::DefineMacro{ L"NUM_GHOSTS", to_wstring(mLensDescription.NumGhosts) });
 		mShaderSettingGraphicsTbl[setting].shaderMacroPS.push_back(Shader::DefineMacro{ L"GRID_DIV", to_wstring(mLensFlareComputeInformation.GRID_DIV) });
 		mShaderSettingGraphicsTbl[setting].shaderMacroPS.push_back(Shader::DefineMacro{ L"SAMPLE_LAMBDA_NUM", to_wstring(mLensFlareComputeInformation.SAMPLE_LAMBDA_NUM) });
+		mShaderSettingGraphicsTbl[setting].shaderMacroPS.push_back(Shader::DefineMacro{ L"NUM_GHOSTS", to_wstring(mLensDescription.NumGhosts) });
 		mShaderSettingGraphicsTbl[setting].descriptorKeys.push_back("computeConstants");
 		mShaderSettingGraphicsTbl[setting].descriptorKeys.push_back("traceResult");
 		mShaderSettingGraphicsTbl[setting].descriptorKeys.push_back("texture");
@@ -447,9 +449,11 @@ void PBLensFlare::setupGraphicsPipeline()
 		mShaderSettingGraphicsTbl[setting].nameAtPipeline = "addGhostsWire";
 		mShaderSettingGraphicsTbl[setting].shaderMacroVS.push_back(Shader::DefineMacro{ L"GRID_DIV", to_wstring(mLensFlareComputeInformation.GRID_DIV) });
 		mShaderSettingGraphicsTbl[setting].shaderMacroVS.push_back(Shader::DefineMacro{ L"SAMPLE_LAMBDA_NUM", to_wstring(mLensFlareComputeInformation.SAMPLE_LAMBDA_NUM) });
+		mShaderSettingGraphicsTbl[setting].shaderMacroVS.push_back(Shader::DefineMacro{ L"NUM_GHOSTS", to_wstring(mLensDescription.NumGhosts) });
 		mShaderSettingGraphicsTbl[setting].shaderMacroVS.push_back(Shader::DefineMacro{ L"WIRE_FRAME", to_wstring(1) });
 		mShaderSettingGraphicsTbl[setting].shaderMacroPS.push_back(Shader::DefineMacro{ L"GRID_DIV", to_wstring(mLensFlareComputeInformation.GRID_DIV) });
 		mShaderSettingGraphicsTbl[setting].shaderMacroPS.push_back(Shader::DefineMacro{ L"SAMPLE_LAMBDA_NUM", to_wstring(mLensFlareComputeInformation.SAMPLE_LAMBDA_NUM) });
+		mShaderSettingGraphicsTbl[setting].shaderMacroPS.push_back(Shader::DefineMacro{ L"NUM_GHOSTS", to_wstring(mLensDescription.NumGhosts) });
 		mShaderSettingGraphicsTbl[setting].shaderMacroPS.push_back(Shader::DefineMacro{ L"WIRE_FRAME", to_wstring(1) });
 		mShaderSettingGraphicsTbl[setting].descriptorKeys.push_back("computeConstants");
 		mShaderSettingGraphicsTbl[setting].descriptorKeys.push_back("traceResult");
@@ -470,9 +474,11 @@ void PBLensFlare::setupGraphicsPipeline()
 		mShaderSettingGraphicsTbl[setting].nameAtPipeline = "addGhostsUV";
 		mShaderSettingGraphicsTbl[setting].shaderMacroVS.push_back(Shader::DefineMacro{ L"GRID_DIV", to_wstring(mLensFlareComputeInformation.GRID_DIV) });
 		mShaderSettingGraphicsTbl[setting].shaderMacroVS.push_back(Shader::DefineMacro{ L"SAMPLE_LAMBDA_NUM", to_wstring(mLensFlareComputeInformation.SAMPLE_LAMBDA_NUM) });
+		mShaderSettingGraphicsTbl[setting].shaderMacroVS.push_back(Shader::DefineMacro{ L"NUM_GHOSTS", to_wstring(mLensDescription.NumGhosts) });
 		mShaderSettingGraphicsTbl[setting].shaderMacroVS.push_back(Shader::DefineMacro{ L"UV", to_wstring(1) });
 		mShaderSettingGraphicsTbl[setting].shaderMacroPS.push_back(Shader::DefineMacro{ L"GRID_DIV", to_wstring(mLensFlareComputeInformation.GRID_DIV) });
 		mShaderSettingGraphicsTbl[setting].shaderMacroPS.push_back(Shader::DefineMacro{ L"SAMPLE_LAMBDA_NUM", to_wstring(mLensFlareComputeInformation.SAMPLE_LAMBDA_NUM) });
+		mShaderSettingGraphicsTbl[setting].shaderMacroPS.push_back(Shader::DefineMacro{ L"NUM_GHOSTS", to_wstring(mLensDescription.NumGhosts) });
 		mShaderSettingGraphicsTbl[setting].shaderMacroPS.push_back(Shader::DefineMacro{ L"UV", to_wstring(1) });
 		mShaderSettingGraphicsTbl[setting].descriptorKeys.push_back("computeConstants");
 		mShaderSettingGraphicsTbl[setting].descriptorKeys.push_back("traceResult");

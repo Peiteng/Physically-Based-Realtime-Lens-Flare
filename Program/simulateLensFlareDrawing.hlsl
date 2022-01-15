@@ -43,14 +43,6 @@ float3 tonemappedColor(float3 origin)
     return curr * whiteScale;
 }
 
-PSInput rayTraceVS(uint vertexID : SV_VertexID, uint instanceID : SV_InstanceID)
-{
-    // (GRID_DIV  * GRID_DIV) vertices per Ghost
-    PSInput vertex = traceResult[vertexID + instanceID * GRID_DIV * GRID_DIV];
-    vertex.pos.xy *= float2(1.f, computeConstants.backbufferSize.x / computeConstants.backbufferSize.y) * computeConstants.ghostScale;
-    return vertex;
-}
-
 float vignetting(float2 gridPos, float2 texUV)
 {
     const float fade = 0.2; //make u mean it
@@ -69,6 +61,14 @@ float vignetting(float2 gridPos, float2 texUV)
 bool isOutUV(float2 uv)
 {
     return uv.x < 0 || uv.x > 1 || uv.y < 0 || uv.y > 1;
+}
+
+PSInput rayTraceVS(uint vertexID : SV_VertexID, uint instanceID : SV_InstanceID)
+{
+    // (GRID_DIV  * GRID_DIV) vertices per Ghost
+    PSInput vertex = traceResult[vertexID + instanceID * GRID_DIV * GRID_DIV];
+    vertex.pos.xy *= float2(1.f, computeConstants.backbufferSize.x / computeConstants.backbufferSize.y) * computeConstants.ghostScale;
+    return vertex;
 }
 
 float4 rayTracePS(in PSInput input) : SV_Target
@@ -142,11 +142,11 @@ float4 rayTracePS(in PSInput input) : SV_Target
         discard;
 
     float3 v = 0;
-    #ifdef WIRE_FRAME
+#ifdef WIRE_FRAME
     v = 0.1;
-    #elif UV
+#elif UV
     v = float3(texUV[0], 0);
-    #else
+#else
     float3 col = 0;
     
     [unroll]
@@ -156,7 +156,39 @@ float4 rayTracePS(in PSInput input) : SV_Target
     }
     col /= (float) (SAMPLE_LAMBDA_NUM);
     v = tonemappedColor(alpha * computeConstants.color * col);
-    #endif
+#endif
     return float4(v, 1.f);
 }
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
+                                                
+
+
+//PSInput rayTraceVS(uint vertexID : SV_VertexID, uint instanceID : SV_InstanceID)
+//{
+//    // (GRID_DIV  * GRID_DIV) vertices per Ghost
+//    PSInput vertex = traceResult[vertexID + instanceID * GRID_DIV * GRID_DIV];
+//    vertex.pos.xy *= float2(1.f, computeConstants.backbufferSize.x / computeConstants.backbufferSize.y) * computeConstants.ghostScale;
+    
+//    for (int n = 0; n < NUM_GHOSTS; ++n)
+//    {
+//        for (int x = 0; x < GRID_DIV; ++x)
+//        {
+//            for (int y = 0; y < GRID_DIV; ++y)
+//            {
+        
+//            }
+//        }
+//    }
+    
+//    return vertex;
+//}
+
+//float4 rayTracePS(in PSInput input) : SV_Target
+//{
+//    int v = 0;
+//    for (int i = 0; i < 1e8; ++i)
+//    {
+//        v += i;
+//    }
+    
+//    return 0;
+//}
