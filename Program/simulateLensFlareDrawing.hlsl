@@ -82,58 +82,37 @@ float4 rayTracePS(in PSInput input) : SV_Target
     float2 gridPos[SAMPLE_LAMBDA_NUM];
     float2 texPos[SAMPLE_LAMBDA_NUM];
     float2 texUV[SAMPLE_LAMBDA_NUM];
+    float aperture[SAMPLE_LAMBDA_NUM];
     
     int i = 0;
-    
+    int apertureDiscardCount = 0;
+    int uvDiscardCount = 0;
+    float vignet = 0;
      [unroll]
     for (i = 0; i < SAMPLE_LAMBDA_NUM; i++)
     {
         gridPos[i] = input.coordinates[i].xy;
         texPos[i] = input.coordinates[i].zw;
         texUV[i] = (texPos[i] + 1.f) / 2.f;
+        vignet += vignetting(gridPos[i], texUV[i]);
+        
+        if (isOutUV(texUV[i]))
+        {
+            uvDiscardCount++;
+        }
+        
+        aperture[i] = texture.Sample(imageSampler, texUV[i]);
+        if (aperture[i] == 0)
+        {
+            apertureDiscardCount++;
+        }
     }
     
-    {
-        int uvDiscardCount = 0;
-         [unroll]
-        for (i = 0; i < SAMPLE_LAMBDA_NUM; i++)
-        {
-            if (isOutUV(texUV[i]))
-            {
-                uvDiscardCount++;
-            }
-        }
-         [branch]
-        if (uvDiscardCount == SAMPLE_LAMBDA_NUM)
-            discard;
-    }
+    [branch]
+    if (apertureDiscardCount == SAMPLE_LAMBDA_NUM || uvDiscardCount == SAMPLE_LAMBDA_NUM)
+        discard;
     
-    float aperture[SAMPLE_LAMBDA_NUM];
-    {
-        int apertureDiscardCount = 0;
-         [unroll]
-        for (i = 0; i < SAMPLE_LAMBDA_NUM; i++)
-        {
-            aperture[i] = texture.Sample(imageSampler, texUV[i]);
-            if (aperture[i] == 0)
-            {
-                apertureDiscardCount++;
-            }
-        }
-        [branch]
-        if (apertureDiscardCount == SAMPLE_LAMBDA_NUM)
-            discard;
-    }
-    
-    float vignet = 0;
-    {
-         [unroll]
-        for (i = 0; i < SAMPLE_LAMBDA_NUM; i++)
-        {
-            vignet += vignetting(gridPos[i], texUV[i]);
-        }
-        vignet /= (float) (SAMPLE_LAMBDA_NUM);
-    }
+    vignet /= (float) (SAMPLE_LAMBDA_NUM);
     
     float alpha = drawInfo.w * vignet * computeConstants.intensity;
     
@@ -148,7 +127,6 @@ float4 rayTracePS(in PSInput input) : SV_Target
     v = float3(texUV[0], 0);
 #else
     float3 col = 0;
-    
     [unroll]
     for (i = 0; i < SAMPLE_LAMBDA_NUM; i++)
     {
@@ -159,36 +137,3 @@ float4 rayTracePS(in PSInput input) : SV_Target
 #endif
     return float4(v, 1.f);
 }
-                                                
-
-
-//PSInput rayTraceVS(uint vertexID : SV_VertexID, uint instanceID : SV_InstanceID)
-//{
-//    // (GRID_DIV  * GRID_DIV) vertices per Ghost
-//    PSInput vertex = traceResult[vertexID + instanceID * GRID_DIV * GRID_DIV];
-//    vertex.pos.xy *= float2(1.f, computeConstants.backbufferSize.x / computeConstants.backbufferSize.y) * computeConstants.ghostScale;
-    
-//    for (int n = 0; n < NUM_GHOSTS; ++n)
-//    {
-//        for (int x = 0; x < GRID_DIV; ++x)
-//        {
-//            for (int y = 0; y < GRID_DIV; ++y)
-//            {
-        
-//            }
-//        }
-//    }
-    
-//    return vertex;
-//}
-
-//float4 rayTracePS(in PSInput input) : SV_Target
-//{
-//    int v = 0;
-//    for (int i = 0; i < 1e8; ++i)
-//    {
-//        v += i;
-//    }
-    
-//    return 0;
-//}

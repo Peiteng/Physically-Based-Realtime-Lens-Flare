@@ -8,7 +8,7 @@
 #include <pix3.h>
 
 #define MAX_DUST_IMAGE_SIZE 512
-#define LAMBDA_NUM 5
+#define LAMBDA_NUM 3
 #define LAMBDA_MAX 700
 #define LAMBDA_MIN 380
 
