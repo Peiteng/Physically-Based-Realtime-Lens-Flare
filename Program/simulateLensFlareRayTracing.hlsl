@@ -58,7 +58,7 @@ struct CBuffer
     float numInterfaces;
     uint apertureIndex;
     float apertureRadius;
-    float padding;
+    uint selectGhostID;
 };
 
 ConstantBuffer<CBuffer> computeConstants : register(b0);
@@ -407,6 +407,7 @@ void rayTraceCS(int3 groupID : SV_GroupID, uint3 groupThreadID : SV_GroupThreadI
 {
     //offset at buffer
     int ghostID = groupID.x / NUM_GROUPS;
+    
     int ghostOffset = ghostID * GRID_DIV * GRID_DIV;
 	
     //offset at ghost
@@ -428,7 +429,22 @@ void rayTraceCS(int3 groupID : SV_GroupID, uint3 groupThreadID : SV_GroupThreadI
     if (COLOR_ID == 0)
     {
         traceResult[ID].pos = result.pos;
-        traceResult[ID].drawInfo = float4(result.drawInfo.rgb, GetRegion(rayID2D, ghostOffset));
+        
+        if (computeConstants.selectGhostID == -1)
+        {
+            traceResult[ID].drawInfo = float4(result.drawInfo.rgb, GetRegion(rayID2D, ghostOffset));
+        }
+        else
+        {//DEBUG
+            if ((uint) ghostID == computeConstants.selectGhostID)
+            {
+                traceResult[ID].drawInfo = float4(result.drawInfo.rgb, GetRegion(rayID2D, ghostOffset));
+            }
+            else
+            {
+                traceResult[ID].drawInfo.w = 0;
+            }
+        }
     }
     traceResult[ID].coordinates[COLOR_ID] = result.coordinates;
     traceResult[ID].color[COLOR_ID].rgb = result.reflectance.a * sampleLambdaCol;

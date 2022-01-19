@@ -19,7 +19,7 @@ PBLensFlare::PBLensFlare() :
 	mGhostTexHeight(0),
 
 	mDrawMode(0),
-	mLensType(LensType_CANON),
+	mLensType(LensType_NIKON),
 
 	mSpread(4.228),
 	mGhostScale(0.014),
@@ -30,6 +30,7 @@ PBLensFlare::PBLensFlare() :
 	mRotAngle(15),
 	mIntensity(20),
 	mBurgstGlitter(0.23),
+	mSelectGhostID(-1),
 
 	mPropdistance(20),
 	mIntervalX(10),

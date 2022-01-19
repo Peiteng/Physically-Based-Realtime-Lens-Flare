@@ -68,6 +68,7 @@ PSInput rayTraceVS(uint vertexID : SV_VertexID, uint instanceID : SV_InstanceID)
     // (GRID_DIV  * GRID_DIV) vertices per Ghost
     PSInput vertex = traceResult[vertexID + instanceID * GRID_DIV * GRID_DIV];
     vertex.pos.xy *= float2(1.f, computeConstants.backbufferSize.x / computeConstants.backbufferSize.y) * computeConstants.ghostScale;
+    
     return vertex;
 }
 
@@ -76,7 +77,8 @@ float4 rayTracePS(in PSInput input) : SV_Target
     float4 drawInfo = input.drawInfo;
     if (drawInfo.z > 1 || drawInfo.w == 0)
     {
-        discard;
+        return float4(0,0,0,1);
+        //discard;
     }
     
     float2 gridPos[SAMPLE_LAMBDA_NUM];

@@ -8,7 +8,7 @@
 #include <pix3.h>
 
 #define MAX_DUST_IMAGE_SIZE 512
-#define LAMBDA_NUM 3
+#define LAMBDA_NUM 10
 #define LAMBDA_MAX 700
 #define LAMBDA_MIN 380
 
@@ -124,7 +124,7 @@ private:
 		f32 numInterfaces;
 		u32 apertureIndex = 0;
 		f32 apertureRadius = 8;
-		f32 padding;
+		s32 selectGhostID = 0;
 	};
 
 	struct drawBurstCB
@@ -341,9 +341,9 @@ private:
 		std::vector<LensInterface> LensInterface;
 		std::vector<GhostData> GhostData;
 
-		std::vector<PatentFormat> LensComponents = Canon70_200mm;
-		s32 APERTURE_IDX = CanonApertureID;
-		s32 NumGhosts = CanonNumGhosts;
+		std::vector<PatentFormat> LensComponents = Nikon28_75mm;
+		s32 APERTURE_IDX = NikonApertureID;
+		s32 NumGhosts = NikonNumGhosts;
 
 		s32 NumLensComponents = (s32)LensComponents.size();
 
@@ -557,6 +557,7 @@ private:
 	f32 mRotAngle;
 	f32 mIntensity;
 	f32 mBurgstGlitter;
+	s32 mSelectGhostID;
 
 	//internal param
 	f32 mPropdistance;

@@ -254,8 +254,8 @@ void PBLensFlare::constructLensFlareComponents()
 
 void  PBLensFlare::constructRayBundle()
 {
-	s32 subdiv = mLensFlareComputeInformation.GRID_DIV;
-	s32 ghostNum = mLensDescription.NumGhosts;
+	const s32 GRID_DIV = mLensFlareComputeInformation.GRID_DIV;
+	const s32 NUM_GHOSTS = mLensDescription.NumGhosts;
 
 	const f32 left = -1.0f;
 	const f32 right = 1.0f;
@@ -264,33 +264,33 @@ void  PBLensFlare::constructRayBundle()
 
 	std::vector<vec3> vertices;
 	std::vector<s32> indices;
-	const u32 numVerticesPerGhost = subdiv * subdiv;
-	vertices.resize(subdiv * subdiv * ghostNum);
-	for (u32 n = 0; n < ghostNum; ++n)
-		for (u32 y = 0; y < subdiv; ++y)
-			for (u32 x = 0; x < subdiv; ++x)
+	const u32 numVerticesPerGhost = GRID_DIV * GRID_DIV;
+	vertices.resize(GRID_DIV * GRID_DIV * NUM_GHOSTS);
+	for (u32 n = 0; n < NUM_GHOSTS; ++n)
+		for (u32 y = 0; y < GRID_DIV; ++y)
+			for (u32 x = 0; x < GRID_DIV; ++x)
 			{
 				const u32 ghostOffset = n * numVerticesPerGhost;
-				const u32 vertexIDPerGhost = x + y * subdiv;
-				const f32 u = std::lerp(left, right, (f32)x / (f32)(subdiv - 1));
-				const f32 v = std::lerp(top, bottom, (f32)y / (f32)(subdiv - 1));
+				const u32 vertexIDPerGhost = x + y * GRID_DIV;
+				const f32 u = std::lerp(left, right, (f32)x / (f32)(GRID_DIV - 1));
+				const f32 v = std::lerp(top, bottom, (f32)y / (f32)(GRID_DIV - 1));
 				vertices[ghostOffset + vertexIDPerGhost] = vec3(u, v, 0);
 			}
 
 	u32 indexOffset = 0;
 	const u32 vertNum = 6;
-	const u32 numIndicesPerGhost = (subdiv - 1) * (subdiv - 1) * vertNum;
-	indices.resize(numIndicesPerGhost * ghostNum);
-	for (u32 n = 0; n < ghostNum; ++n)
-		for (u32 y = 0; y < subdiv - 1; ++y)
+	const u32 numIndicesPerGhost = (GRID_DIV - 1) * (GRID_DIV - 1) * vertNum;
+	indices.resize(numIndicesPerGhost * NUM_GHOSTS);
+	for (u32 n = 0; n < NUM_GHOSTS; ++n)
+		for (u32 y = 0; y < GRID_DIV - 1; ++y)
 		{
-			for (u32 x = 0; x < subdiv - 1; ++x)
+			for (u32 x = 0; x < GRID_DIV - 1; ++x)
 			{
-				u32 index = (y * (subdiv - 1) + x) * vertNum + numIndicesPerGhost * n;
+				u32 index = (y * (GRID_DIV - 1) + x) * vertNum + numIndicesPerGhost * n;
 
 				const u32 id0 = indexOffset;
 				const u32 id1 = id0 + 1;
-				const u32 id2 = id0 + subdiv;
+				const u32 id2 = id0 + GRID_DIV;
 				const u32 id3 = id2 + 1;
 
 				indices[index++] = id2;
@@ -306,7 +306,7 @@ void  PBLensFlare::constructRayBundle()
 			indexOffset++;
 		}
 
-	mRayBundle.suvdiv = subdiv;
+	mRayBundle.suvdiv = GRID_DIV;
 
 	auto indexBufferSize = UINT(sizeof(UINT) * indices.size());
 	createIndexBuffer(mRayBundle.indexBuffer, indexBufferSize, indices.data());

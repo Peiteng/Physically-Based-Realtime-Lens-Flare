@@ -195,7 +195,7 @@ void PBLensFlare::displayParameters()
 		if (ImGui::CollapsingHeader("SETTINGS"))
 		{
 			ImGui::Combo("Draw Mode", (s32*)&mDrawMode,
-				"Fill\0Wire\0OverwriteWire\0UV\0");
+				"Fill\0Wire(DEBUG)\0Fill&Wire(DEBUG)\0UV(DEBUG)\0");
 		}
 	
 		if (ImGui::CollapsingHeader("ADJUSTMENT"))
@@ -257,6 +257,10 @@ void PBLensFlare::displayParameters()
 			}
 		}
 		
+		if (ImGui::CollapsingHeader("DEBUG"))
+		{
+			ImGui::SliderInt("Select Ghost ID", &mSelectGhostID, -1, mLensDescription.NumGhosts - 1);
+		}
 	}
 }
 

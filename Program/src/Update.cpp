@@ -14,6 +14,7 @@ void PBLensFlare::updateBuffer()
 	tracingCB.spread = mSpread;
 	tracingCB.apertureIndex = mLensDescription.APERTURE_IDX;
 	tracingCB.apertureRadius = mApertureRadius;
+	tracingCB.selectGhostID = mSelectGhostID;
 
 	drawBurstCB drawBurstCB;
 	drawBurstCB.lightDir = lightDir;
