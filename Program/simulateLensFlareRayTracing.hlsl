@@ -1,4 +1,6 @@
-﻿struct PSInput
+﻿#include "simulateLensFlareGlobalFunction.hlsl"
+
+struct PSInput
 {
     float4 pos : SV_POSITION;
     float4 drawInfo : TEXCOORD0;
@@ -281,14 +283,14 @@ void computeTracedRay(inout Ray r, float lambda, int2 bounces)
             [branch]
             if (r.drawInfo.a < computeConstants.invisibleReflectance)
             {
+                makeRayInvisible(r);
                 break;
             }
         }
     }
-    
    
     [branch]
-    if (k < MAX_LensID_Diff || r.drawInfo.a < computeConstants.invisibleReflectance)
+    if (k < MAX_LensID_Diff)
     {
         makeRayInvisible(r);
     }
@@ -378,83 +380,42 @@ InfoPerLambda Trace(float2 origin, float wavelength, int2 bounces)
     return result;
 }
 
-float3 lambda2RGB(float lambda)
-{
-    float3 colRGB;
-
-    if (lambda < 350.0)
-        colRGB = float3(0.5, 0.0, 1.0);
-    else if ((lambda >= 350.0) && (lambda < 440.0))
-        colRGB = float3((440.0 - lambda) / 90.0, 0.0, 1.0);
-    else if ((lambda >= 440.0) && (lambda <= 490.0))
-        colRGB = float3(0.0, (lambda - 440.0) / 50.0, 1.0);
-    else if ((lambda >= 490.0) && (lambda < 510.0))
-        colRGB = float3(0.0, 1.0, (-(lambda - 510.0)) / 20.0);
-    else if ((lambda >= 510.0) && (lambda < 580.0))
-        colRGB = float3((lambda - 510.0) / 70.0, 1.0, 0.0);
-    else if ((lambda >= 580.0) && (lambda < 645.0))
-        colRGB = float3(1.0, (-(lambda - 645.0)) / 65.0, 0.0);
-    else
-        colRGB = float3(1.0, 0.0, 0.0);
-
-    if (lambda < 350.0)
-        colRGB *= 0.3;
-    else if ((lambda >= 350.0) && (lambda < 420.0))
-        colRGB *= 0.3 + (0.7 * ((lambda - 350.0) / 70.0));
-    else if ((lambda >= 420.0) && (lambda <= 700.0))
-        colRGB *= 1.0;
-    else if ((lambda > 700.0) && (lambda <= 780.0))
-        colRGB *= 0.3 + (0.7 * ((780.0 - lambda) / 80.0));
-    else
-        colRGB *= 0.3;
-
-    return colRGB;
-}
-
 [numthreads(NUM_THREADS, NUM_THREADS, 1)]
 void rayTraceCS(int3 groupID : SV_GroupID, uint3 groupThreadID : SV_GroupThreadID)
 {
     //offset at buffer
     int ghostID = groupID.x / NUM_GROUPS;
-    
     int ghostOffset = ghostID * GRID_DIV * GRID_DIV;
-	
+    int2 bounces = int2(ghostData[ghostID].bounce1, ghostData[ghostID].bounce2);
     //offset at ghost
     int2 rayID2D = groupThreadID.xy + (groupID.xy % NUM_GROUPS) * NUM_THREADS; //(0～GRID_DIV - 1, 0～GRID_DIV - 1)
     float2 ray2DPos = (rayID2D / float(GRID_DIV - 1) - 0.5f) * 2.f; //-1～1
-    
-    const float range = LAMBDA_RED - LAMBDA_BLUE;
-    
+    //lambda
     const int COLOR_ID = groupID.z;
-    const float sampleLambda = LAMBDA_RED - COLOR_ID * range / (float) (SAMPLE_LAMBDA_NUM);
-    
-    int2 bounces = int2(ghostData[ghostID].bounce1, ghostData[ghostID].bounce2);
+    const float sampleLambda = lerp(LAMBDA_RED, LAMBDA_BLUE, COLOR_ID / (float) (SAMPLE_LAMBDA_NUM));
     InfoPerLambda result = Trace(ray2DPos, sampleLambda, bounces);
 	
-    uint ID = GetOffsetAtOneGhost(rayID2D) + ghostOffset;
-    
-    float3 sampleLambdaCol = lambda2RGB(sampleLambda);
-
+    const uint bufferID = GetOffsetAtOneGhost(rayID2D) + ghostOffset;
     if (COLOR_ID == 0)
     {
-        traceResult[ID].pos = result.pos;
+        traceResult[bufferID].pos = result.pos;
         
         if (computeConstants.selectGhostID == -1)
         {
-            traceResult[ID].drawInfo = float4(result.drawInfo.rgb, GetRegion(rayID2D, ghostOffset));
+            traceResult[bufferID].drawInfo = float4(result.drawInfo.rgb, GetRegion(rayID2D, ghostOffset));
         }
         else
         {//DEBUG
             if ((uint) ghostID == computeConstants.selectGhostID)
             {
-                traceResult[ID].drawInfo = float4(result.drawInfo.rgb, GetRegion(rayID2D, ghostOffset));
+                traceResult[bufferID].drawInfo = float4(result.drawInfo.rgb, GetRegion(rayID2D, ghostOffset));
             }
             else
             {
-                traceResult[ID].drawInfo.w = 0;
+                traceResult[bufferID].drawInfo.w = 0;
             }
         }
     }
-    traceResult[ID].coordinates[COLOR_ID] = result.coordinates;
-    traceResult[ID].color[COLOR_ID].rgb = result.reflectance.a * sampleLambdaCol;
+    traceResult[bufferID].coordinates[COLOR_ID] = result.coordinates;
+    traceResult[bufferID].color[COLOR_ID].rgb = result.reflectance.a * lambda2RGB(sampleLambda);
 }

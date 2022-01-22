@@ -99,7 +99,7 @@ float4 rayTracePS(in PSInput input) : SV_Target
         float aperture = texture.Sample(imageSampler, texUV);
         col += aperture * input.color[lambda].rgb;
         [branch]
-        if (aperture == 0)
+        if (aperture < 1e-3)
         {
             apertureDiscardCount++;
         }

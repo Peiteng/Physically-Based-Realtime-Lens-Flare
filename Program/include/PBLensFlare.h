@@ -8,7 +8,7 @@
 #include <pix3.h>
 
 #define MAX_DUST_IMAGE_SIZE 512
-#define LAMBDA_NUM 10//if larger, quality become high, speed become slow
+#define LAMBDA_NUM 7//if larger, quality become high, speed become slow
 #define LAMBDA_MAX 700
 #define LAMBDA_MIN 380
 
