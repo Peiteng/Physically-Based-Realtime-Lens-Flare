@@ -416,7 +416,7 @@ void rayTraceCS(int3 groupID : SV_GroupID, uint3 groupThreadID : SV_GroupThreadI
     
     const float range = LAMBDA_RED - LAMBDA_BLUE;
     
-    int COLOR_ID = groupID.z;
+    const int COLOR_ID = groupID.z;
     const float sampleLambda = LAMBDA_RED - COLOR_ID * range / (float) (SAMPLE_LAMBDA_NUM);
     
     int2 bounces = int2(ghostData[ghostID].bounce1, ghostData[ghostID].bounce2);

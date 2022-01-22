@@ -75,36 +75,31 @@ PSInput rayTraceVS(uint vertexID : SV_VertexID, uint instanceID : SV_InstanceID)
 float4 rayTracePS(in PSInput input) : SV_Target
 {
     float4 drawInfo = input.drawInfo;
+    
+      [branch]
     if (drawInfo.z > 1 || drawInfo.w == 0)
     {
         return float4(0,0,0,1);
-        //discard;
     }
     
-    float2 gridPos[SAMPLE_LAMBDA_NUM];
-    float2 texPos[SAMPLE_LAMBDA_NUM];
-    float2 texUV[SAMPLE_LAMBDA_NUM];
-    float aperture[SAMPLE_LAMBDA_NUM];
-    
-    int i = 0;
+    int lambda = 0;
     int apertureDiscardCount = 0;
     int uvDiscardCount = 0;
-    float vignet = 0;
+    float3 col = 0;
      [unroll]
-    for (i = 0; i < SAMPLE_LAMBDA_NUM; i++)
+    for (lambda = 0; lambda < SAMPLE_LAMBDA_NUM; lambda++)
     {
-        gridPos[i] = input.coordinates[i].xy;
-        texPos[i] = input.coordinates[i].zw;
-        texUV[i] = (texPos[i] + 1.f) / 2.f;
-        vignet += vignetting(gridPos[i], texUV[i]);
-        
-        if (isOutUV(texUV[i]))
+        float2 texUV = (input.coordinates[lambda].zw + 1.f) * 0.5f;
+        [branch]
+        if (isOutUV(texUV))
         {
             uvDiscardCount++;
         }
         
-        aperture[i] = texture.Sample(imageSampler, texUV[i]);
-        if (aperture[i] == 0)
+        float aperture = texture.Sample(imageSampler, texUV);
+        col += aperture * input.color[lambda].rgb;
+        [branch]
+        if (aperture == 0)
         {
             apertureDiscardCount++;
         }
@@ -114,28 +109,13 @@ float4 rayTracePS(in PSInput input) : SV_Target
     if (apertureDiscardCount == SAMPLE_LAMBDA_NUM || uvDiscardCount == SAMPLE_LAMBDA_NUM)
         discard;
     
-    vignet /= (float) (SAMPLE_LAMBDA_NUM);
-    
-    float alpha = drawInfo.w * vignet * computeConstants.intensity;
-    
-    [branch]
-    if (alpha == 0.f)
-        discard;
-
     float3 v = 0;
 #ifdef WIRE_FRAME
     v = 0.1;
 #elif UV
-    v = float3(texUV[0], 0);
+    v = float3((input.coordinates[0].zw + 1.f) * 0.5f, 0);
 #else
-    float3 col = 0;
-    [unroll]
-    for (i = 0; i < SAMPLE_LAMBDA_NUM; i++)
-    {
-        col += aperture[i] * input.color[i].rgb;
-    }
-    col /= (float) (SAMPLE_LAMBDA_NUM);
-    v = tonemappedColor(alpha * computeConstants.color * col);
+    v = tonemappedColor(drawInfo.w * vignetting(input.coordinates[0].xy, input.coordinates[0].zw) * computeConstants.intensity * computeConstants.color * col / (float) (SAMPLE_LAMBDA_NUM));
 #endif
     return float4(v, 1.f);
 }
