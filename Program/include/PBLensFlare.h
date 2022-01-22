@@ -125,6 +125,9 @@ private:
 		u32 apertureIndex = 0;
 		f32 apertureRadius = 8;
 		s32 selectGhostID = 0;
+
+		float invisibleReflectance;
+		FLOAT3 padding;
 	};
 
 	struct drawBurstCB
@@ -558,6 +561,7 @@ private:
 	f32 mIntensity;
 	f32 mBurgstGlitter;
 	s32 mSelectGhostID;
+	f32 mInvisibleReflectance;
 
 	//internal param
 	f32 mPropdistance;

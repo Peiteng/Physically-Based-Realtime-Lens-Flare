@@ -256,7 +256,10 @@ void PBLensFlare::displayParameters()
 				}
 			}
 		}
-		
+		if (ImGui::CollapsingHeader("OPTIMIZATION"))
+		{
+			ImGui::SliderFloat("Invisible Reflectance", &mInvisibleReflectance, 0, 0.1);
+		}
 		if (ImGui::CollapsingHeader("DEBUG"))
 		{
 			ImGui::SliderInt("Select Ghost ID", &mSelectGhostID, -1, mLensDescription.NumGhosts - 1);

@@ -31,6 +31,7 @@ PBLensFlare::PBLensFlare() :
 	mIntensity(20),
 	mBurgstGlitter(0.23),
 	mSelectGhostID(-1),
+	mInvisibleReflectance(0),
 
 	mPropdistance(20),
 	mIntervalX(10),

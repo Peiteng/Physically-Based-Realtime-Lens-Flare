@@ -59,6 +59,9 @@ struct CBuffer
     uint apertureIndex;
     float apertureRadius;
     uint selectGhostID;
+    
+    float invisibleReflectance;
+    float3 padding;
 };
 
 ConstantBuffer<CBuffer> computeConstants : register(b0);
@@ -274,12 +277,18 @@ void computeTracedRay(inout Ray r, float lambda, int2 bounces)
         { 
             r.dir = reflect(r.dir, i.norm);
             r.drawInfo.a *= FresnelAR(i.theta, lambda, F.d1, n0, n1, n2); // update ray intensity
+            
+            [branch]
+            if (r.drawInfo.a < computeConstants.invisibleReflectance)
+            {
+                break;
+            }
         }
     }
     
-    const float invisibleRef = 0;
+   
     [branch]
-    if (k < MAX_LensID_Diff || r.drawInfo.a < invisibleRef)
+    if (k < MAX_LensID_Diff || r.drawInfo.a < computeConstants.invisibleReflectance)
     {
         makeRayInvisible(r);
     }
