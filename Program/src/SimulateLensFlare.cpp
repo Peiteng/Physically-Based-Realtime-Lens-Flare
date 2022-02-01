@@ -8,6 +8,11 @@ void PBLensFlare::executeRayTracingLensFlareCommand()
 	setupDrawing(rtv, dsv);
 	updateBuffer();
 
+	if (mErrorShaderTbl.size() != 0)
+	{
+		return;
+	}
+
 	if (mBurstKernelRegenerate)
 	{
 		generateBurst();
@@ -149,6 +154,7 @@ void PBLensFlare::addBurst()
 
 void PBLensFlare::setupSimulateLensFlarePipeline()
 {
+	mErrorShaderTbl.resize(0);
 	setupComputePipeline();
 	setupGraphicsPipeline();
 }

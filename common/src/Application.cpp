@@ -564,19 +564,33 @@ void Application::setupComputePipelineAndSignature(vector<CD3DX12_STATIC_SAMPLER
 
 		Shader shaderCS;
 
+		bool isCSValid = true;
 		if (!settings.shaderFileName.empty())
 		{
-			shaderCS.load(settings.shaderFileName, Shader::Compute, settings.shaderEntryPoint, settings.flags, settings.shaderMacro);
+			isCSValid = shaderCS.load(settings.shaderFileName, Shader::Compute, settings.shaderEntryPoint, settings.flags, settings.shaderMacro);
 		}
 
-		D3D12_COMPUTE_PIPELINE_STATE_DESC computeDesc{};
-		computeDesc.CS = CD3DX12_SHADER_BYTECODE(shaderCS.getCode().Get());
-		computeDesc.pRootSignature = mSignatureTbl[settings.nameAtPipeline].Get();
-
 		PipelineState pipeline;
-		hr = mDevice->CreateComputePipelineState(&computeDesc, IID_PPV_ARGS(&pipeline));
-		ThrowIfFailed(hr, "CreateComputePipelineState failed.");
-		mPipelineStateTbl[settings.nameAtPipeline] = pipeline;
+		if (isCSValid)
+		{
+			D3D12_COMPUTE_PIPELINE_STATE_DESC computeDesc{};
+			computeDesc.CS = CD3DX12_SHADER_BYTECODE(shaderCS.getCode().Get());
+			computeDesc.pRootSignature = mSignatureTbl[settings.nameAtPipeline].Get();
+			
+			hr = mDevice->CreateComputePipelineState(&computeDesc, IID_PPV_ARGS(&pipeline));
+			ThrowIfFailed(hr, "CreateComputePipelineState failed.");
+
+			mPipelineStateTbl[settings.nameAtPipeline] = pipeline;
+		}
+		else
+		{
+			ErrorShader errShader = { settings.shaderFileName, settings.shaderEntryPoint, settings.nameAtPipeline };
+			mErrorShaderTbl.emplace_back(errShader);
+			//if (mPipelineStateTbl[settings.nameAtPipeline].Get() == nullptr)
+			//{
+			//	throw runtime_error("First time shader compile failed");
+			//}
+		}
 	}
 }
 
@@ -620,45 +634,94 @@ void Application::setupGraphicsPipelineAndSignature(vector<CD3DX12_STATIC_SAMPLE
 
 		Shader shaderVS, shaderPS, shaderGS, shaderHS, shaderDS;
 
+		bool isVSValid = true, isPSValid = true, isGSValid = true, isHSValid = true, isDSValid = true;
+		ErrorShader errShader;
 		if (!settings.shaderFileNameVS.empty())
 		{
-			shaderVS.load(settings.shaderFileNameVS, Shader::Vertex, settings.shaderEntryPointVS, settings.flags, settings.shaderMacroVS);
+			isVSValid = shaderVS.load(settings.shaderFileNameVS, Shader::Vertex, settings.shaderEntryPointVS, settings.flags, settings.shaderMacroVS);
+			if (!isVSValid)
+			{
+				errShader.shaderFileName = settings.shaderFileNameVS;
+				errShader.shaderEntryPoint = settings.shaderEntryPointVS;
+				errShader.nameAtPipeline = settings.nameAtPipeline;
+				mErrorShaderTbl.emplace_back(errShader);
+			}
 		}
-		if (!settings.shaderFileNamePS.empty())
+		if (!settings.shaderFileNamePS.empty() && isVSValid)
 		{
-			shaderPS.load(settings.shaderFileNamePS, Shader::Pixel, settings.shaderEntryPointPS, settings.flags, settings.shaderMacroPS);
+			isPSValid = shaderPS.load(settings.shaderFileNamePS, Shader::Pixel, settings.shaderEntryPointPS, settings.flags, settings.shaderMacroPS);
+			if (!isVSValid)
+			{
+				errShader.shaderFileName = settings.shaderFileNamePS;
+				errShader.shaderEntryPoint = settings.shaderEntryPointPS;
+				errShader.nameAtPipeline = settings.nameAtPipeline;
+				mErrorShaderTbl.emplace_back(errShader);
+			}
 		}
-		if (!settings.shaderFileNameGS.empty())
+		if (!settings.shaderFileNameGS.empty() && isPSValid)
 		{
-			shaderGS.load(settings.shaderFileNameGS, Shader::Geometry, settings.shaderEntryPointGS, settings.flags, settings.shaderMacroGS);
+			isGSValid = shaderGS.load(settings.shaderFileNameGS, Shader::Geometry, settings.shaderEntryPointGS, settings.flags, settings.shaderMacroGS);
+			if (!isVSValid)
+			{
+				errShader.shaderFileName = settings.shaderFileNameGS;
+				errShader.shaderEntryPoint = settings.shaderEntryPointGS;
+				errShader.nameAtPipeline = settings.nameAtPipeline;
+				mErrorShaderTbl.emplace_back(errShader);
+			}
 		}
-		if (!settings.shaderFileNameHS.empty())
+		if (!settings.shaderFileNameHS.empty() && isGSValid)
 		{
-			shaderHS.load(settings.shaderFileNameHS, Shader::Hull, settings.shaderEntryPointHS, settings.flags, settings.shaderMacroHS);
+			isHSValid = shaderHS.load(settings.shaderFileNameHS, Shader::Hull, settings.shaderEntryPointHS, settings.flags, settings.shaderMacroHS);
+			if (!isVSValid)
+			{
+				errShader.shaderFileName = settings.shaderFileNameHS;
+				errShader.shaderEntryPoint = settings.shaderEntryPointHS;
+				errShader.nameAtPipeline = settings.nameAtPipeline;
+				mErrorShaderTbl.emplace_back(errShader);
+			}
 		}
-		if (!settings.shaderFileNameDS.empty())
+		if (!settings.shaderFileNameDS.empty() && isHSValid)
 		{
-			shaderDS.load(settings.shaderFileNameDS, Shader::Domain, settings.shaderEntryPointDS, settings.flags, settings.shaderMacroDS);
+			isDSValid = shaderDS.load(settings.shaderFileNameDS, Shader::Domain, settings.shaderEntryPointDS, settings.flags, settings.shaderMacroDS);
+			if (!isVSValid)
+			{
+				errShader.shaderFileName = settings.shaderFileNameDS;
+				errShader.shaderEntryPoint = settings.shaderEntryPointDS;
+				errShader.nameAtPipeline = settings.nameAtPipeline;
+				mErrorShaderTbl.emplace_back(errShader);
+			}
 		}
-
-		auto psoDesc = appUtility::createDefaultPsoDesc(
-			DXGI_FORMAT_R8G8B8A8_UNORM,
-			settings.rasterizerState,
-			settings.imputElements.data(), settings.imputElements.size(),
-			mSignatureTbl[settings.nameAtPipeline],
-			shaderVS.getCode(),
-			shaderPS.getCode(),
-			shaderGS.getCode(),
-			shaderHS.getCode(),
-			shaderDS.getCode(),
-			isDepthEnable,
-			isAlphaEnable
-		);
 
 		PipelineState pipeline;
-		hr = mDevice->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&pipeline));
-		ThrowIfFailed(hr, "CreateGraphicsPipelineState Failed.");
-		mPipelineStateTbl[settings.nameAtPipeline] = pipeline;
+
+		if (isVSValid && isPSValid && isGSValid && isHSValid && isDSValid)
+		{
+			auto psoDesc = appUtility::createDefaultPsoDesc(
+				DXGI_FORMAT_R8G8B8A8_UNORM,
+				settings.rasterizerState,
+				settings.imputElements.data(), settings.imputElements.size(),
+				mSignatureTbl[settings.nameAtPipeline],
+				shaderVS.getCode(),
+				shaderPS.getCode(),
+				shaderGS.getCode(),
+				shaderHS.getCode(),
+				shaderDS.getCode(),
+				isDepthEnable,
+				isAlphaEnable
+			);
+
+			hr = mDevice->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&pipeline));
+			ThrowIfFailed(hr, "CreateGraphicsPipelineState Failed.");
+
+			mPipelineStateTbl[settings.nameAtPipeline] = pipeline;
+		}
+		else
+		{
+		/*	if (mPipelineStateTbl[settings.nameAtPipeline].Get() == nullptr)
+			{
+				throw runtime_error("First time shader compile failed");
+			}*/
+		}
 	}
 }
 

@@ -18,7 +18,7 @@ using namespace std::experimental::filesystem;
 using namespace std;
 using namespace Microsoft::WRL;
 
-void Shader::load(const std::wstring& fileName, Stage stage,
+bool Shader::load(const std::wstring& fileName, Stage stage,
 	const std::wstring& entryPoint,
 	const std::vector<std::wstring>& flags,
 	const std::vector<DefineMacro>& defines)
@@ -118,6 +118,8 @@ void Shader::load(const std::wstring& fileName, Stage stage,
 	}
 	if (FAILED(hr))
 	{
-		throw runtime_error("shader compile failed.");
+		return false;
 	}
+
+	return true;
 }

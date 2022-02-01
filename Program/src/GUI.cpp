@@ -177,6 +177,14 @@ void PBLensFlare::renderHUD()
 			ImGui::TextColored(IMVEC_YELLOW, "File Must be Exist or Image Size Must be power of 2 and 512 or less");
 		}
 	}
+
+	if (!mErrorShaderTbl.empty())
+	{
+		ImGui::TextColored(IMVEC_RED, "Shader Error Occurred During Shader Compilation !!!!");
+		for(const auto & err : mErrorShaderTbl)
+		ImGui::TextColored(IMVEC_RED, "File: %ls EntryPoint: %ls NameAtPipeline: %s", err.shaderFileName.c_str(), err.shaderEntryPoint.c_str(), err.nameAtPipeline.c_str());
+	}
+
 	displayParameters();
 	ImGui::Spacing();
 
@@ -289,8 +297,7 @@ void PBLensFlare::buttomAction()
 		waitForIdleGPU();
 
 		setupWorkingTexture();
-		setupComputePipeline();
-		setupGraphicsPipeline();
+		setupSimulateLensFlarePipeline();
 
 		mBurstKernelRegenerate = true;
 		mGhostKernelRegenerate = true;
@@ -304,8 +311,7 @@ void PBLensFlare::buttomAction()
 		if (mRecompile)
 		{
 			setupWorkingTexture();
-			setupComputePipeline();
-			setupGraphicsPipeline();
+			setupSimulateLensFlarePipeline();
 			mRecompile = false;
 		}
 
@@ -331,8 +337,7 @@ void PBLensFlare::buttomAction()
 		constructRayBundle();
 
 		setupWorkingTexture();
-		setupComputePipeline();
-		setupGraphicsPipeline();
+		setupSimulateLensFlarePipeline();
 
 		mBurstKernelRegenerate = true;
 		mGhostKernelRegenerate = true;

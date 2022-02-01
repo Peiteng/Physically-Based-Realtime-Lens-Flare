@@ -116,14 +116,14 @@ Intersection intersectionTestSphere(Ray r, LensInterface F)
 
 Intersection getIntersectionInfo(Ray r, LensInterface F)
 {
-    Intersection i;
-    
     if (F.flat)
-        i = intersectionTestFlat(r, F);
+    {
+        return intersectionTestFlat(r, F);
+    }
     else
-        i = intersectionTestSphere(r, F);
-    
-    return i;
+    {
+        return intersectionTestSphere(r, F);
+    }
 }
 
 float FresnelAR(float theta0RAD, float lambda, float d1, float n0, float n1, float n2)
@@ -193,7 +193,7 @@ void refIndexCorrect(inout float n, float lambda)
 
 void computeTracedRay(inout Ray r, float lambda, int2 bounces)
 {
-    const int MAX_LensID_Diff = bounces.x + (bounces.x - bounces.y) + (computeConstants.numInterfaces - bounces.y) - 1;
+    const int MAX_LENSID_DIFF = bounces.x + (bounces.x - bounces.y) + (computeConstants.numInterfaces - bounces.y) - 1;
     int bounceID = 0;
     int lensIDStep = 1;
     int currentLensID = 1;
@@ -203,7 +203,7 @@ void computeTracedRay(inout Ray r, float lambda, int2 bounces)
     LensInterface F;
     int k;
     
-    for (k = 0; k < MAX_LensID_Diff; k++, currentLensID += lensIDStep)
+    for (k = 0; k < MAX_LENSID_DIFF; k++, currentLensID += lensIDStep)
     {
         F = lensInterface[currentLensID];
 
@@ -214,7 +214,7 @@ void computeTracedRay(inout Ray r, float lambda, int2 bounces)
             bounceID++;
         }
         
-        if (bounceID > MAX_LensID_Diff)
+        if (bounceID > MAX_LENSID_DIFF)
         {
             break;
         }
@@ -258,16 +258,12 @@ void computeTracedRay(inout Ray r, float lambda, int2 bounces)
         [branch]
         if (!isReflect)
         { // refraction
-            
-            float refraction_nIN = n0;
-            float refraction_nOUT = n2;
-            
             {//ref idx correction by lambda
-                refIndexCorrect(refraction_nIN, lambda);
-                refIndexCorrect(refraction_nOUT, lambda);
+                refIndexCorrect(n0, lambda);
+                refIndexCorrect(n2, lambda);
             }
             
-            r.dir = refract(r.dir, i.norm, refraction_nIN / refraction_nOUT);
+            r.dir = refract(r.dir, i.norm, n0 / n2);
 			[branch]
             if (length(r.dir) < ep)//in the theory, we must use "equal", but, in this case we ease condition because of affection 
             {
@@ -290,7 +286,7 @@ void computeTracedRay(inout Ray r, float lambda, int2 bounces)
     }
    
     [branch]
-    if (k < MAX_LensID_Diff)
+    if (k < MAX_LENSID_DIFF)
     {
         makeRayInvisible(r);
     }

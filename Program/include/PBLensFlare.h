@@ -579,4 +579,5 @@ private:
 	GridNum mGridNum;
 
 	bool mFFTEnable;
+	
 };

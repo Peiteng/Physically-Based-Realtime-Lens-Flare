@@ -113,6 +113,13 @@ public:
 		DescriptorHandle rtv;
 	};
 
+	struct ErrorShader
+	{
+		std::wstring shaderFileName;
+		std::wstring shaderEntryPoint;
+		std::string nameAtPipeline;
+	};
+
 	using PipelineState = ComPtr<ID3D12PipelineState>;
 
 	Application();
@@ -223,6 +230,7 @@ protected:
 	std::unordered_map<std::string, PipelineState> mPipelineStateTbl;
 	std::vector<ShaderSettingCompute> mShaderSettingComputeTbl;
 	std::vector<ShaderSettingGraphics> mShaderSettingGraphicsTbl;
+	std::vector<ErrorShader> mErrorShaderTbl;
 
 	ComPtr<ID3D12Device> mDevice;
 	ComPtr<ID3D12CommandQueue> mCommandQueue;

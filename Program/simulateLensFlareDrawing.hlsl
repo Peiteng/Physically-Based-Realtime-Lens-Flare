@@ -82,6 +82,13 @@ float4 rayTracePS(in PSInput input) : SV_Target
         return float4(0,0,0,1);
     }
     
+#ifdef WIRE_FRAME
+    return 1;
+#endif
+    
+#ifdef UV
+    return float4((input.coordinates[0].zw + 1.f) * 0.5f, 0, 1);
+#endif
     int lambda = 0;
     int apertureDiscardCount = 0;
     int uvDiscardCount = 0;
@@ -109,13 +116,5 @@ float4 rayTracePS(in PSInput input) : SV_Target
     if (apertureDiscardCount == SAMPLE_LAMBDA_NUM || uvDiscardCount == SAMPLE_LAMBDA_NUM)
         discard;
     
-    float3 v = 0;
-#ifdef WIRE_FRAME
-    v = 0.1;
-#elif UV
-    v = float3((input.coordinates[0].zw + 1.f) * 0.5f, 0);
-#else
-    v = tonemappedColor(drawInfo.w * vignetting(input.coordinates[0].xy, input.coordinates[0].zw) * computeConstants.intensity * computeConstants.color * col / (float) (SAMPLE_LAMBDA_NUM));
-#endif
-    return float4(v, 1.f);
+    return float4(tonemappedColor(drawInfo.w * vignetting(input.coordinates[0].xy, input.coordinates[0].zw) * computeConstants.intensity * computeConstants.color * col / (float) (SAMPLE_LAMBDA_NUM)), 1);
 }

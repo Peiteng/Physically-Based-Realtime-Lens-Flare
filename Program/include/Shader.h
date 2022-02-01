@@ -29,7 +29,7 @@ public:
 		std::wstring Value;
 	};
 
-	void load(const std::wstring& fileName, Stage stage,
+	bool load(const std::wstring& fileName, Stage stage,
 		const std::wstring& entryPoint,
 		const std::vector<std::wstring>& flags,
 		const std::vector<DefineMacro>& defines);
