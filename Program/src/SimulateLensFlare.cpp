@@ -24,12 +24,9 @@ void PBLensFlare::executeRayTracingLensFlareCommand()
 
 	auto judge = [this]() -> bool { return mGhostIntensityRatio && mSpread > 0 && (mColor.x + mColor.y + mColor.z > 1e-4); } ();
 
-	if (mTraceRequired)
+	if (mTraceRequired && judge)
 	{
-		if (judge)
-		{
-			traceRay();
-		}
+		traceRay();
 		mTraceRequired = false;
 	}
 

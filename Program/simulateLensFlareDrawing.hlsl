@@ -79,7 +79,8 @@ float4 rayTracePS(in PSInput input) : SV_Target
       [branch]
     if (drawInfo.z > 1 || drawInfo.w == 0)
     {
-        return float4(0,0,0,1);
+        //return float4(0,0,0,1);
+        discard;
     }
     
 #ifdef WIRE_FRAME

@@ -432,7 +432,7 @@ private:
 
 	bool mGhostKernelRegenerate = true;
 	bool mBurstKernelRegenerate = true;
-	bool mRebuildComponent = true;
+	bool mRebuildComponent = false;
 	bool mDivNunmChanged = false;
 	bool mTraceRequired = true;
 	bool mCBForceUpdate = false;

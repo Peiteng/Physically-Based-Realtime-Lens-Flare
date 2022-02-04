@@ -104,6 +104,9 @@ void PBLensFlare::updateBuffer()
 	if (mPosXSave != mPosX || mPosYSave != mPosY)
 	{
 		mTraceRequired = true;
+
+		mPosXSave = mPosX;
+		mPosYSave = mPosY;
 	}
 }
 
