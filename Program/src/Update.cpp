@@ -60,6 +60,14 @@ void PBLensFlare::updateBuffer()
 		writeToUploadHeapMemory(mUtilityCB[0].Get(), sizeof(utilityCB), &utilityCB);
 		writeToUploadHeapMemory(mLensFlareSceneCB[0].Get(), sizeof(sceneCB), &sceneCB);
 		mCBForceUpdate = false;
+
+		mCacheTracingCBStruct = tracingCB;
+		mCacheDrawBurstCBStruct = drawBurstCB;
+		mCacheDrawingCBStruct = drawingCB;
+		mCacheFRFCBStruct = frfCB;
+		mCacheBurstCBStruct = burstCB;
+		mCacheUtilityCBStruct = utilityCB;
+		mCacheSceneCBStruct = sceneCB;
 	}
 	else
 	{
@@ -67,6 +75,7 @@ void PBLensFlare::updateBuffer()
 		{
 			writeToUploadHeapMemory(mTracingCB[0].Get(), sizeof(tracingCB), &tracingCB);
 			mCacheTracingCBStruct = tracingCB;
+			mTraceRequired = true;
 		}
 		if (memcmp(&drawBurstCB, &mCacheDrawBurstCBStruct, sizeof(drawBurstCB)))
 		{
@@ -98,15 +107,6 @@ void PBLensFlare::updateBuffer()
 			writeToUploadHeapMemory(mLensFlareSceneCB[0].Get(), sizeof(sceneCB), &sceneCB);
 			mCacheSceneCBStruct = sceneCB;
 		}
-	}
-
-
-	if (mPosXSave != mPosX || mPosYSave != mPosY)
-	{
-		mTraceRequired = true;
-
-		mPosXSave = mPosX;
-		mPosYSave = mPosY;
 	}
 }
 
