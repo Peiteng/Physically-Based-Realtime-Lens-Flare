@@ -135,7 +135,6 @@ void PBLensFlare::updateLens()
 		mLensDescription.NumGhosts = mLensDescription.NikonNumGhosts;
 		break;
 	}
-	mLensDescription.NumLensComponents = (s32)mLensDescription.LensComponents.size();
 }
 
 void PBLensFlare::updateComputeInfo()

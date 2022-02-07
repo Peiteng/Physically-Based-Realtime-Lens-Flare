@@ -133,27 +133,31 @@ void PBLensFlare::constructConstantBufferForLensFlare()
 void PBLensFlare::constructLensFlareComponents()
 {
 	mLensDescription.LensInterface.clear();
-	mLensDescription.LensInterface.resize(mLensDescription.NumLensComponents);
+	mLensDescription.LensInterface.resize(mLensDescription.LensComponents.size());
 	mLensDescription.LensInterface.shrink_to_fit();
 
 	const FLOAT2 padding{ 0,0 };
-	for (s32 i = mLensDescription.NumLensComponents - 1; i >= 0; --i)
+	f32 totalLensDistance = 0;
+	f32 minRefIndex = FLT_MAX;
+	f32 maxRefIndex = -FLT_MAX;
+
+	for (s32 i = mLensDescription.LensComponents.size() - 1; i >= 0; --i)
 	{
 		PatentFormat& component = mLensDescription.LensComponents[i];
-		mLensDescription.TotalLensDistance += component.d;
+		totalLensDistance += component.d;
 
 		//first midium is air
 		f32 leftRefIndex = (i == 0) ? 1.f : mLensDescription.LensComponents[i - 1].n;
 		f32 rightRefIndex = component.n;
 
-		mLensDescription.MinRefIndex
-			= (rightRefIndex != 1.f) ? std::min(mLensDescription.MinRefIndex, rightRefIndex) : mLensDescription.MinRefIndex;
-		mLensDescription.MaxRefIndex
-			= (rightRefIndex != 1.f) ? std::max(mLensDescription.MaxRefIndex, leftRefIndex) : mLensDescription.MaxRefIndex;
+		minRefIndex
+			= (rightRefIndex != 1.f) ? std::min(minRefIndex, rightRefIndex) : minRefIndex;
+		maxRefIndex
+			= (rightRefIndex != 1.f) ? std::max(maxRefIndex, leftRefIndex) : maxRefIndex;
 
 		LensInterface lensInterface =
 		{
-			vec3(0.f, 0.f, mLensDescription.TotalLensDistance - component.radius),
+			vec3(0.f, 0.f, totalLensDistance - component.radius),
 			component.radius,
 			vec3(leftRefIndex, 1.0f, rightRefIndex),
 			component.sa_h,

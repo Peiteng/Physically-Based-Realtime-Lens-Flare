@@ -347,12 +347,6 @@ private:
 		std::vector<PatentFormat> LensComponents = Nikon28_75mm;
 		s32 APERTURE_IDX = NikonApertureID;
 		s32 NumGhosts = NikonNumGhosts;
-
-		s32 NumLensComponents = (s32)LensComponents.size();
-
-		f32 TotalLensDistance = 0.f;
-		f32 MaxRefIndex = -1000.f;
-		f32 MinRefIndex = 1000.f;
 	};
 
 	enum ShaderNameCompute
@@ -495,8 +489,7 @@ private:
 
 	//computation
 	void drawFRF(DX12Buffer& Real, DX12Buffer& Image);
-	void FFT2D(DX12Buffer& Real, DX12Buffer& Image);
-	void invFFT2D(DX12Buffer& Real, DX12Buffer& Image);
+	void FFT2D(DX12Buffer& Real, DX12Buffer& Image, const bool inverse = false);
 	void raiseValue(DX12Buffer& InReal, DX12Buffer& InImage, DX12Buffer& OutReal, DX12Buffer& OutImage);
 	void lambdaIntegral(DX12Buffer& InReal, DX12Buffer& InImage, DX12Buffer& OutReal, DX12Buffer& OutImage);
 	void burstFiltering(DX12Buffer& In, DX12Buffer& Out);
