@@ -87,6 +87,9 @@
     <ClInclude Include="..\common\include\AppUtil.h">
       <Filter>ヘッダー ファイル\Base</Filter>
     </ClInclude>
+    <ClInclude Include="include\LensParam.h">
+      <Filter>ヘッダー ファイル\App</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\common\imgui\imgui_demo.cpp">
@@ -148,6 +151,9 @@
     </ClCompile>
     <ClCompile Include="..\common\imgui\examples\imgui_impl_win32.cpp">
       <Filter>ソース ファイル\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\LensParam.cpp">
+      <Filter>ソース ファイル\App</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

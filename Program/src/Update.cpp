@@ -116,8 +116,8 @@ void PBLensFlare::updateLens()
 	{
 	case LensType_NIKON:
 		mLensDescription.LensComponents = mLensDescription.Nikon28_75mm;
-		mLensDescription.APERTURE_IDX = mLensDescription.NikonApertureID;
-		mLensDescription.NumGhosts = mLensDescription.NikonNumGhosts;
+		mLensDescription.APERTURE_IDX = mLensDescription.Nikon28_75mm_ApertureID;
+		mLensDescription.NumGhosts = mLensDescription.Nikon28_75mm_NumGhosts;
 		break;
 	case LensType_ANGENIEUX:
 		mLensDescription.LensComponents = mLensDescription.Angenieux;
@@ -131,8 +131,8 @@ void PBLensFlare::updateLens()
 		break;
 	default:
 		mLensDescription.LensComponents = mLensDescription.Nikon28_75mm;
-		mLensDescription.APERTURE_IDX = mLensDescription.NikonApertureID;
-		mLensDescription.NumGhosts = mLensDescription.NikonNumGhosts;
+		mLensDescription.APERTURE_IDX = mLensDescription.Nikon28_75mm_ApertureID;
+		mLensDescription.NumGhosts = mLensDescription.Nikon28_75mm_NumGhosts;
 		break;
 	}
 }

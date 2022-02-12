@@ -144,7 +144,7 @@ void PBLensFlare::renderHUD()
 		ImGui::Text("GridNum: %d x %d", mLensFlareComputeInformation.GRID_DIV, mLensFlareComputeInformation.GRID_DIV);
 		ImGui::Text("GhostNum: %d", mLensDescription.NumGhosts);
 		ImGui::Text("VertexNum: %d", mLensDescription.NumGhosts * mLensFlareComputeInformation.GRID_DIV * mLensFlareComputeInformation.GRID_DIV);
-		ImGui::Text("SampledLambdaNum: %d(From %.0f nm to %.f nm)", mLensFlareComputeInformation.SAMPLE_LAMBDA_NUM, mLensFlareComputeInformation.LAMBDA_RED, mLensFlareComputeInformation.LAMBDA_BLUE);
+		ImGui::Text("SampledLambdaNum: %d(From %.0f nm to %.f nm)", mLensFlareComputeInformation.SAMPLE_LAMBDA_NUM, mLensFlareComputeInformation.LAMBDA_NM_RED, mLensFlareComputeInformation.LAMBDA_NM_BLUE);
 	}
 
 	u32 vertexByte = mLensDescription.NumGhosts * mLensFlareComputeInformation.GRID_DIV * mLensFlareComputeInformation.GRID_DIV * sizeof(vec3);
@@ -238,7 +238,11 @@ void PBLensFlare::displayParameters()
 					mTraceRequired = true;
 					mCBForceUpdate = true;
 				}
-				ImGui::Checkbox("Use AR Coating", &mUseAR);
+				if (ImGui::Checkbox("Use AR Coating", &mUseAR))
+				{
+					mTraceRequired = true;
+					mCBForceUpdate = true;
+				}
 			}
 			if (ImGui::CollapsingHeader("BUNDLE"))
 			{

@@ -112,6 +112,7 @@ copy "$(WindowsSdkDir)Redist\D3D\$(PlatformTarget)\dxil.dll" "$(ProjectDir)dxil.
     <ClInclude Include="..\common\include\AppUtil.h" />
     <ClInclude Include="..\common\include\DescriptorManager.h" />
     <ClInclude Include="..\common\include\Swapchain.h" />
+    <ClInclude Include="include\LensParam.h" />
     <ClInclude Include="include\PBLensFlare.h" />
     <ClInclude Include="include\DX12Buffer.h" />
     <ClInclude Include="include\LinearAlgebra.h" />
@@ -128,6 +129,7 @@ copy "$(WindowsSdkDir)Redist\D3D\$(PlatformTarget)\dxil.dll" "$(ProjectDir)dxil.
     <ClCompile Include="..\common\src\Swapchain.cpp" />
     <ClCompile Include="src\ConstructBuffer.cpp" />
     <ClCompile Include="src\DiffractionImage.cpp" />
+    <ClCompile Include="src\LensParam.cpp" />
     <ClCompile Include="src\PBLensFlare.cpp" />
     <ClCompile Include="src\DX12Buffer.cpp" />
     <ClCompile Include="src\GUI.cpp" />

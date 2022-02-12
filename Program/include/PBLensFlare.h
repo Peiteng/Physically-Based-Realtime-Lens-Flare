@@ -2,6 +2,7 @@
 #include "../common/include/Application.h"
 #include "DirectXMath.h"
 #include <DirectXPackedVector.h>
+#include "../Program/include/LensParam.h"
 
 #include <array>
 #include <utility>
@@ -9,8 +10,8 @@
 
 #define MAX_DUST_IMAGE_SIZE 512
 #define LAMBDA_NUM 7//if larger, quality become high, speed become slow
-#define LAMBDA_MAX 700
-#define LAMBDA_MIN 380
+#define LAMBDA_NM_MAX 700
+#define LAMBDA_NM_MIN 380
 
 class PBLensFlare : public Application {
 public:
@@ -79,13 +80,13 @@ private:
 
 	struct LensFlareAppInformationForCompute
 	{
-	    s32 GRID_DIV = 16;
+		s32 GRID_DIV = 16;
 		s32 NUM_THREADS = 16;
 		s32 NUM_GROUPS = GRID_DIV / NUM_THREADS;
 		s32 NUM_VERTICES_PER_BUNDLES = (GRID_DIV - 1) * (GRID_DIV - 1);
 		s32 SAMPLE_LAMBDA_NUM = LAMBDA_NUM;
-		f32 LAMBDA_RED = LAMBDA_MAX;
-		f32 LAMBDA_BLUE = LAMBDA_MIN;
+		f32 LAMBDA_NM_RED = LAMBDA_NM_MAX;
+		f32 LAMBDA_NM_BLUE = LAMBDA_NM_MIN;
 	};
 
 	struct PatentFormat {
@@ -95,6 +96,7 @@ private:
 		f32 sa_h; //nomial radius (from. opt. axis)   [mm]
 		f32 d;;//distance between lens   [mm]
 		bool  f;//is this interface a plane?
+		f32 abbe_number = 0;
 	};
 
 	struct LensInterface {
@@ -182,57 +184,61 @@ private:
 	struct LensDescription {
 		const f32 AirN = 1.f;
 		// Nikon Lens
-		const f32 Nikon_d6 = 53.142f;
-		const f32 Nikon_d10 = 7.063f;
-		const f32 Nikon_d14 = 1.532f;
-		const f32 Nikon_dAp = 2.800f;
-		const f32 Nikon_d20 = 16.889f;
-		const f32 Nikon_Bf = 39.683f;
-		const s32 NikonApertureID = 14;//AP_IDX
-		const s32 NikonNumGhosts = 352; // 27!/2*(27-2)!
+		const f32 Nikon28_75mm_d6 = 53.142f;
+		const f32 Nikon28_75mm_d10 = 7.063f;
+		const f32 Nikon28_75mm_d14 = 1.532f;
+		const f32 Nikon28_75mm_dAp = 2.800f;
+		const f32 Nikon28_75mm_d20 = 16.889f;
+		const f32 Nikon28_75mm_Bf = 39.683f;
+		const s32 Nikon28_75mm_ApertureID = 14;//AP_IDX
+		const s32 Nikon28_75mm_NumGhosts = 352; // 27!/2*(27-2)!
+
+		//n at d-line(587.6 nm)
+		//https://patft.uspto.gov/netacgi/nph-Parser?Sect2=PTO1&Sect2=HITOFF&p=1&u=/netahtml/PTO/search-bool.html&r=1&f=G&l=50&d=PALL&RefSrch=yes&Query=PN/5835272
+		//TABLE1
 		const std::vector<PatentFormat> Nikon28_75mm = {//29
-			//curvature radius  | c_thickness |  n | sa_h | d | flat
-			{    72.747f,  530, 1.60300f, 29.0f, 2.300f, false },
+			//curvature radius  | c_thickness |  n | sa_h | d | flat | abbe
+			{    72.747f,  530, 1.60300f, 29.0f, 2.300f, false ,65.42},
 			{    37.000f, 600, AirN, 29.0f, 13.000f, false},
 
-			{  -172.809f,  570, 1.58913f,  26.2f,  2.100f, false},
+			{  -172.809f,  570, 1.58913f,  26.2f,  2.100f, false, 61.09},
 			{    39.894f,  660, AirN,  26.2f, 1.000f ,false},
 
-			{    49.820f,  330, 1.86074f, 20.0f, 4.400f , false},
-			{    74.750f,      544, AirN, 20.0f, Nikon_d6 , false},
+			{    49.820f,  330, 1.86074f, 20.0f, 4.400f , false, 23.01},
+			{    74.750f,      544, AirN, 20.0f, Nikon28_75mm_d6 , false},
 
-			{    63.402f,  740, 1.86074f, 16.1f, 1.600f , false},
-			{    37.530f,  411, 1.51680f, 16.1f, 8.600f , false},
+			{    63.402f,  740, 1.86074f, 16.1f, 1.600f , false, 23.01},
+			{    37.530f,  411, 1.51680f, 16.1f, 8.600f , false, 64.10 },
 
-			{   -75.887f,  580, 1.80458f, 16.0f, 1.600f , false},
-			{   -97.792f,     730, AirN, 16.5f, Nikon_d10 , false},
+			{   -75.887f,  580, 1.80458f, 16.0f, 1.600f , false, 25.50},
+			{   -97.792f,     730, AirN, 16.5f, Nikon28_75mm_d10 , false},
 
-			{    96.034f,  700, 1.62041f, 18.0f, 3.600f , false},
+			{    96.034f,  700, 1.62041f, 18.0f, 3.600f , false, 60.14 },
 			{   261.743f,  440, AirN, 18.0f, 0.100f , false},
 
-			{    54.262f,  800, 1.69680f, 18.0f, 6.000f , false},
-			{ -5995.277f,     300, AirN, 18.0f, Nikon_d14 , false},
+			{    54.262f,  800, 1.69680f, 18.0f, 6.000f , false, 55.60 },
+			{ -5995.277f,     300, AirN, 18.0f, Nikon28_75mm_d14 , false},
 
-			{       0.0f,     440, AirN,  7.f, Nikon_dAp , true},//aperture
-			{   -74.414f,  500, 1.90265f, 13.0f, 2.200f , false},
+			{       0.0f,     440, AirN,  7.f, Nikon28_75mm_dAp , true},//aperture
+			{   -74.414f,  500, 1.90265f, 13.0f, 2.200f , false, 35.72 },
 
-			{   -62.929f,  770, 1.51680f, 13.0f, 1.450f , false},
+			{   -62.929f,  770, 1.51680f, 13.0f, 1.450f , false, 64.10 },
 			{   121.380f,  820, AirN, 13.1f, 2.500f , false},
 
-			{   -85.723f,  200, 1.49782f, 13.0f, 1.400f , false},
-			{    31.093f,  540, 1.80458f, 13.1f, 2.600f , false},
+			{   -85.723f,  200, 1.49782f, 13.0f, 1.400f , false, 82.52 },
+			{    31.093f,  540, 1.80458f, 13.1f, 2.600f , false, 25.50},
 
-			{    84.758f,     580, AirN, 13.0f, Nikon_d20 , false},
-			{   459.690f,  533, 1.86074f, 15.0f, 1.400f , false},
+			{    84.758f,     580, AirN, 13.0f, Nikon28_75mm_d20 , false},
+			{   459.690f,  533, 1.86074f, 15.0f, 1.400f , false, 23.01},
 
-			{    40.240f,  666, 1.49782f, 15.0f, 7.300f , false},
+			{    40.240f,  666, 1.49782f, 15.0f, 7.300f , false, 82.52 },
 			{   -49.771f,  500, AirN, 15.2f, 0.100f , false},
 
-			{    62.369f,  487, 1.67025f, 16.0f, 7.000f , false},
+			{    62.369f,  487, 1.67025f, 16.0f, 7.000f , false, 57.53},
 			{   -76.454f,  671, AirN, 16.0f, 5.200f , false},
 
-			{   -32.524f,  487, 1.80454f, 17.0f, 2.000f , false},
-			{   -50.194f,      732, AirN, 17.0f, Nikon_Bf , false},
+			{   -32.524f,  487, 1.80454f, 17.0f, 2.000f , false, 39.61},
+			{   -50.194f,      732, AirN, 17.0f, Nikon28_75mm_Bf , false},
 
 			{        0.f,     500, AirN, 10.f, 5.f ,  true}
 		};
@@ -345,8 +351,8 @@ private:
 		std::vector<GhostData> GhostData;
 
 		std::vector<PatentFormat> LensComponents = Nikon28_75mm;
-		s32 APERTURE_IDX = NikonApertureID;
-		s32 NumGhosts = NikonNumGhosts;
+		s32 APERTURE_IDX = Nikon28_75mm_ApertureID;
+		s32 NumGhosts = Nikon28_75mm_NumGhosts;
 	};
 
 	enum ShaderNameCompute
@@ -564,7 +570,7 @@ private:
 	f32 mPosXSave;
 	f32 mPosYSave;
 	s32 mGlarelambdasamplenum;
-	
+
 	bool mUseAR;
 
 	f32 mExecuteTimeMS;
@@ -572,5 +578,5 @@ private:
 	GridNum mGridNum;
 
 	bool mFFTEnable;
-	
+
 };

@@ -1,4 +1,5 @@
 ﻿#include "simulateLensFlareGlobalFunction.hlsl"
+#include "simulateLensFlareRefIndex.hlsl"
 
 struct PSInput
 {
@@ -171,27 +172,7 @@ void makeRayInvisible(inout Ray r)
     r.drawInfo.a = 0; //mark up invalid ray
 }
 
-float sqrtNtime(float val, float N)
-{
-    for (int i = 0; i < N; i++)
-    {
-        val = sqrt(val);
-    }
-    return val;
-}
-
-void refIndexCorrect(inout float n, float lambda)
-{
-    const float lambda0 = (LAMBDA_RED + LAMBDA_BLUE) / 2;
-    float coef = sqrtNtime(lambda0 / lambda, 6); //if lambda smaler, n is larger
-            
-    if (n != 1)
-    {
-        n *= coef;
-    }
-}
-
-void computeTracedRay(inout Ray r, float lambda, int2 bounces)
+void computeTracedRay(inout Ray r, float lambdaNM, int2 bounces, DispersionCurveEquationCoef coef)
 {
     const int MAX_LENSID_DIFF = bounces.x + (bounces.x - bounces.y) + (computeConstants.numInterfaces - bounces.y) - 1;
     int bounceID = 0;
@@ -246,8 +227,15 @@ void computeTracedRay(inout Ray r, float lambda, int2 bounces)
             continue;
 
 		// do reflection / refraction for sphere surfaces
-        float n0 = r.dir.z < 0.f ? F.n.x : F.n.z;
-        float n2 = r.dir.z < 0.f ? F.n.z : F.n.x;
+        int n0Idx = r.dir.z < 0.f ? F.n.x : F.n.z;
+        int n2Idx = r.dir.z < 0.f ? F.n.z : F.n.x;
+        
+        Lens lens0, lens2;
+        
+        constructLens(lens0, n0Idx);
+        float n0 = lens0.coef.computeRefIndex(lambdaNM * 1e-3);
+        constructLens(lens2, n2Idx);
+        float n2 = lens2.coef.computeRefIndex(lambdaNM * 1e-3);
         
 #ifdef AR_CORTING
         float n1 = max(sqrt(n0 * n2), 1.38);
@@ -258,11 +246,6 @@ void computeTracedRay(inout Ray r, float lambda, int2 bounces)
         [branch]
         if (!isReflect)
         { // refraction
-            {//ref idx correction by lambda
-                refIndexCorrect(n0, lambda);
-                refIndexCorrect(n2, lambda);
-            }
-            
             r.dir = refract(r.dir, i.norm, n0 / n2);
 			[branch]
             if (length(r.dir) < ep)//in the theory, we must use "equal", but, in this case we ease condition because of affection 
@@ -274,7 +257,7 @@ void computeTracedRay(inout Ray r, float lambda, int2 bounces)
         else
         { 
             r.dir = reflect(r.dir, i.norm);
-            r.drawInfo.a *= FresnelAR(i.theta, lambda, F.d1, n0, n1, n2); // update ray intensity
+            r.drawInfo.a *= FresnelAR(i.theta, lambdaNM, F.d1, n0, n1, n2); // update ray intensity
             
             [branch]
             if (r.drawInfo.a < computeConstants.invisibleReflectance)
@@ -365,7 +348,19 @@ InfoPerLambda Trace(float2 origin, float wavelength, int2 bounces)
 
     //first intersected ray
     Ray ray = { originPos, computeConstants.lightDir.xyz, float4(0.xxx, 1) };
-    computeTracedRay(ray, wavelength, bounces);
+    
+    DispersionCurveEquationCoef coef;
+    coef.A0 = 3.45215485E+00;
+    coef.A1 = -1.40748042E-02;
+    coef.A2 = 0.00000000E+00;
+    coef.A3 = 5.02420375E-02;
+    coef.A4 = 3.57942817E-03;
+    coef.A5 = -4.94644665E-04;
+    coef.A6 = 1.29480898E-04;
+    coef.A7 = -1.35467075E-05;
+    coef.A8 = 6.96875364E-07;
+    
+    computeTracedRay(ray, wavelength, bounces, coef);
 
     InfoPerLambda result;
     result.pos = float4(ray.pos.xyz, 1.f);
@@ -388,8 +383,8 @@ void rayTraceCS(int3 groupID : SV_GroupID, uint3 groupThreadID : SV_GroupThreadI
     float2 ray2DPos = (rayID2D / float(GRID_DIV - 1) - 0.5f) * 2.f; //-1～1
     //lambda
     const int COLOR_ID = groupID.z;
-    const float sampleLambda = lerp(LAMBDA_RED, LAMBDA_BLUE, COLOR_ID / (float) (SAMPLE_LAMBDA_NUM));
-    InfoPerLambda result = Trace(ray2DPos, sampleLambda, bounces);
+    const float sampleLambdaNM = lerp(LAMBDA_NM_RED, LAMBDA_NM_BLUE, COLOR_ID / (float) (SAMPLE_LAMBDA_NUM));
+    InfoPerLambda result = Trace(ray2DPos, sampleLambdaNM, bounces);
 	
     const uint bufferID = GetOffsetAtOneGhost(rayID2D) + ghostOffset;
     if (COLOR_ID == 0)
@@ -413,5 +408,5 @@ void rayTraceCS(int3 groupID : SV_GroupID, uint3 groupThreadID : SV_GroupThreadI
         }
     }
     traceResult[bufferID].coordinates[COLOR_ID] = result.coordinates;
-    traceResult[bufferID].color[COLOR_ID].rgb = result.reflectance.a * lambda2RGB(sampleLambda);
+    traceResult[bufferID].color[COLOR_ID].rgb = result.reflectance.a * lambda2RGB(sampleLambdaNM);
 }

@@ -138,8 +138,6 @@ void PBLensFlare::constructLensFlareComponents()
 
 	const FLOAT2 padding{ 0,0 };
 	f32 totalLensDistance = 0;
-	f32 minRefIndex = FLT_MAX;
-	f32 maxRefIndex = -FLT_MAX;
 
 	for (s32 i = mLensDescription.LensComponents.size() - 1; i >= 0; --i)
 	{
@@ -150,16 +148,44 @@ void PBLensFlare::constructLensFlareComponents()
 		f32 leftRefIndex = (i == 0) ? 1.f : mLensDescription.LensComponents[i - 1].n;
 		f32 rightRefIndex = component.n;
 
-		minRefIndex
-			= (rightRefIndex != 1.f) ? std::min(minRefIndex, rightRefIndex) : minRefIndex;
-		maxRefIndex
-			= (rightRefIndex != 1.f) ? std::max(maxRefIndex, leftRefIndex) : maxRefIndex;
+		s32 leftIdx = 0;
+		s32 rightIdx = 0;
+		{
+			f32 leftRefIdxDiff = FLT_MAX;
+			f32 rightRefIdxDiff = FLT_MAX;
+			for (u32 idx = 0; idx < LensName::LENS_NAME_MAX; ++idx)
+			{
+				Lens lens;
+				constructLens(lens, idx);
+
+				if (leftRefIndex != 1)
+				{
+					f32 currentLeftAbbeDiff = abs(lens.abbe.nd - leftRefIndex);
+					if (leftRefIdxDiff > currentLeftAbbeDiff)
+					{
+						leftIdx = idx;
+						leftRefIdxDiff = currentLeftAbbeDiff;
+					}
+				}
+
+				if (rightRefIndex != 1)
+				{
+					f32 currentRightAbbeDiff = abs(lens.abbe.nd - rightRefIndex);
+					if (rightRefIdxDiff > currentRightAbbeDiff)
+					{
+						rightIdx = idx;
+						rightRefIdxDiff = currentRightAbbeDiff;
+					}
+				}
+			
+			}
+		}
 
 		LensInterface lensInterface =
 		{
 			vec3(0.f, 0.f, totalLensDistance - component.radius),
 			component.radius,
-			vec3(leftRefIndex, 1.0f, rightRefIndex),
+			vec3(leftIdx, 1.0f, rightIdx),
 			component.sa_h,
 			component.c_thickness,
 			component.f ? 1.0f : 0.0f,
