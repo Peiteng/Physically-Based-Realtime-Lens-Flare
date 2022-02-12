@@ -233,9 +233,10 @@ void computeTracedRay(inout Ray r, float lambdaNM, int2 bounces, DispersionCurve
         Lens lens0, lens2;
         
         constructLens(lens0, n0Idx);
-        float n0 = lens0.coef.computeRefIndex(lambdaNM * 1e-3);
+        //if idx < 0, it is AIR(n = 1)
+        float n0 = n0Idx >= 0 ? lens0.coef.computeRefIndex(lambdaNM * 1e-3) : 1;
         constructLens(lens2, n2Idx);
-        float n2 = lens2.coef.computeRefIndex(lambdaNM * 1e-3);
+        float n2 = n2Idx >= 0 ? lens2.coef.computeRefIndex(lambdaNM * 1e-3) : 1;
         
 #ifdef AR_CORTING
         float n1 = max(sqrt(n0 * n2), 1.38);

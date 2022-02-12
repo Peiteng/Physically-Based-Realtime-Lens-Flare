@@ -24,7 +24,7 @@ PBLensFlare::PBLensFlare() :
 	mSpread(4.228),
 	mGhostScale(0.014),
 	mApertureRadius(0.4),
-	mGhostIntensityRatio(500),
+	mGhostIntensityRatio(1000),
 	mColor(FLOAT3(1.f, 1.f, 1.f)),
 	mApertureBladeNum(8),
 	mRotAngle(15),

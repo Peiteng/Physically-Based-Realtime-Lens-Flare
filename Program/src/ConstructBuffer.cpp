@@ -148,9 +148,11 @@ void PBLensFlare::constructLensFlareComponents()
 		f32 leftRefIndex = (i == 0) ? 1.f : mLensDescription.LensComponents[i - 1].n;
 		f32 rightRefIndex = component.n;
 
-		s32 leftIdx = 0;
-		s32 rightIdx = 0;
-		{
+		s32 leftIdx = -1;
+		s32 rightIdx = -1;
+
+		if(leftRefIndex != 1 || rightRefIndex != 1)
+		{//if medium is not AIR, we must detect lens property
 			f32 leftRefIdxDiff = FLT_MAX;
 			f32 rightRefIdxDiff = FLT_MAX;
 			for (u32 idx = 0; idx < LensName::LENS_NAME_MAX; ++idx)
@@ -177,7 +179,6 @@ void PBLensFlare::constructLensFlareComponents()
 						rightRefIdxDiff = currentRightAbbeDiff;
 					}
 				}
-			
 			}
 		}
 
