@@ -534,7 +534,7 @@ void Application::setupComputePipelineAndSignature(vector<CD3DX12_STATIC_SAMPLER
 			const string key = settings.descriptorKeys[i];
 			const s32 index = settings.descriptors[key].rootParamIndex;
 
-			if (settings.descriptors[key].isConstantBuffer)
+			if (settings.descriptors[key].descriptorRange.RangeType == D3D12_DESCRIPTOR_RANGE_TYPE_CBV)
 			{
 				int a = settings.descriptors[key].descriptorRange.BaseShaderRegister;
 				rootParams[index].InitAsConstantBufferView(settings.descriptors[key].descriptorRange.BaseShaderRegister);
@@ -605,7 +605,7 @@ void Application::setupGraphicsPipelineAndSignature(vector<CD3DX12_STATIC_SAMPLE
 			const string key = settings.descriptorKeys[i];
 			const s32 index = settings.descriptors[key].rootParamIndex;
 
-			if (settings.descriptors[key].isConstantBuffer)
+			if (settings.descriptors[key].descriptorRange.RangeType == D3D12_DESCRIPTOR_RANGE_TYPE_CBV)
 			{
 				rootParams[index].InitAsConstantBufferView(settings.descriptors[key].descriptorRange.BaseShaderRegister);
 			}

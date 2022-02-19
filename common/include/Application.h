@@ -59,7 +59,6 @@ public:
 
 	struct DescriptorInfo
 	{
-		bool isConstantBuffer;
 		s32 rootParamIndex;
 		D3D12_DESCRIPTOR_RANGE descriptorRange;
 	};
