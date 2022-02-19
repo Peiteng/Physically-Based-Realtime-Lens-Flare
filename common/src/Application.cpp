@@ -536,7 +536,6 @@ void Application::setupComputePipelineAndSignature(vector<CD3DX12_STATIC_SAMPLER
 
 			if (settings.descriptors[key].descriptorRange.RangeType == D3D12_DESCRIPTOR_RANGE_TYPE_CBV)
 			{
-				int a = settings.descriptors[key].descriptorRange.BaseShaderRegister;
 				rootParams[index].InitAsConstantBufferView(settings.descriptors[key].descriptorRange.BaseShaderRegister);
 			}
 			else
@@ -587,10 +586,6 @@ void Application::setupComputePipelineAndSignature(vector<CD3DX12_STATIC_SAMPLER
 		{
 			ErrorShader errShader = { settings.shaderFileName, settings.shaderEntryPoint, settings.nameAtPipeline };
 			mErrorShaderTbl.emplace_back(errShader);
-			//if (mPipelineStateTbl[settings.nameAtPipeline].Get() == nullptr)
-			//{
-			//	throw runtime_error("First time shader compile failed");
-			//}
 		}
 	}
 }
@@ -715,13 +710,6 @@ void Application::setupGraphicsPipelineAndSignature(vector<CD3DX12_STATIC_SAMPLE
 			ThrowIfFailed(hr, "CreateGraphicsPipelineState Failed.");
 
 			mPipelineStateTbl[settings.nameAtPipeline] = pipeline;
-		}
-		else
-		{
-		/*	if (mPipelineStateTbl[settings.nameAtPipeline].Get() == nullptr)
-			{
-				throw runtime_error("First time shader compile failed");
-			}*/
 		}
 	}
 }
