@@ -536,6 +536,7 @@ void Application::setupComputePipelineAndSignature(vector<CD3DX12_STATIC_SAMPLER
 
 			if (settings.descriptors[key].isConstantBuffer)
 			{
+				int a = settings.descriptors[key].descriptorRange.BaseShaderRegister;
 				rootParams[index].InitAsConstantBufferView(settings.descriptors[key].descriptorRange.BaseShaderRegister);
 			}
 			else

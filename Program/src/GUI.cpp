@@ -247,7 +247,7 @@ void PBLensFlare::displayParameters()
 			if (ImGui::CollapsingHeader("BUNDLE"))
 			{
 				if (ImGui::Combo("Grid Num", (s32*)&mGridNum,
-					"_4x4\0_8x8\0_16x16\0_32x32\0_64x64\0"))
+					"_16x16\0_32x32\0_64x64\0"))
 				{
 					mDivNunmChanged = true;
 					mTraceRequired = true;

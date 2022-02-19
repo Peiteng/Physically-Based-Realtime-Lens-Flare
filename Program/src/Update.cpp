@@ -141,14 +141,6 @@ void PBLensFlare::updateComputeInfo()
 {
 	switch (mGridNum)
 	{
-	case GridNum_4x4:
-		mLensFlareComputeInformation.GRID_DIV = 4;
-		mLensFlareComputeInformation.NUM_THREADS = 4;
-		break;
-	case GridNum_8x8:
-		mLensFlareComputeInformation.GRID_DIV = 8;
-		mLensFlareComputeInformation.NUM_THREADS = 8;
-		break;
 	case GridNum_16x16:
 		mLensFlareComputeInformation.GRID_DIV = 16;
 		mLensFlareComputeInformation.NUM_THREADS = 16;

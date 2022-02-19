@@ -107,6 +107,11 @@ void PBLensFlare::setupRayTraceLensFlare()
 
 void PBLensFlare::constructConstantBufferForLensFlare()
 {
+	mLensBank = createConstantBuffers(CD3DX12_RESOURCE_DESC::Buffer(
+		sizeof(Lens) * LENS_NAME_MAX
+	));
+	writeToUploadHeapMemory(mLensBank[0].Get(), sizeof(Lens) * LENS_NAME_MAX, LENS_TABLE);
+
 	mTracingCB = createConstantBuffers(CD3DX12_RESOURCE_DESC::Buffer(
 		sizeof(tracingCB)
 	));
@@ -157,8 +162,7 @@ void PBLensFlare::constructLensFlareComponents()
 			f32 rightRefIdxDiff = FLT_MAX;
 			for (u32 idx = 0; idx < LensName::LENS_NAME_MAX; ++idx)
 			{
-				Lens lens;
-				constructLens(lens, idx);
+				Lens lens = LENS_TABLE[idx];
 
 				if (leftRefIndex != 1)
 				{

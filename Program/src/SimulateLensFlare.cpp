@@ -92,6 +92,7 @@ void PBLensFlare::traceRay()
 	const u32 pass = mUseAR ? ShaderNameCompute_TraceRayAR : ShaderNameCompute_TraceRay;
 	mCommandList->SetComputeRootSignature(mSignatureTbl[mShaderSettingComputeTbl[pass].nameAtPipeline].Get());
 	mCommandList->SetComputeRootConstantBufferView(mShaderSettingComputeTbl[pass].descriptors["computeConstants"].rootParamIndex, mTracingCB[0]->GetGPUVirtualAddress());
+	mCommandList->SetComputeRootConstantBufferView(mShaderSettingComputeTbl[pass].descriptors["lensBank"].rootParamIndex, mLensBank[0]->GetGPUVirtualAddress());
 	mCommandList->SetComputeRootDescriptorTable(mShaderSettingComputeTbl[pass].descriptors["traceResult"].rootParamIndex, mRayBundle.vertexBuffer.getUAV(mCommandList));
 	mCommandList->SetComputeRootDescriptorTable(mShaderSettingComputeTbl[pass].descriptors["lensInterface"].rootParamIndex, mLensInterfaceBuffer.getSRV(mCommandList));
 	mCommandList->SetComputeRootDescriptorTable(mShaderSettingComputeTbl[pass].descriptors["ghostData"].rootParamIndex, mGhostDataBuffer.getSRV(mCommandList));

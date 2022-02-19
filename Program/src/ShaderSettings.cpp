@@ -22,14 +22,17 @@ void PBLensFlare::setupComputePipeline()
 		mShaderSettingComputeTbl[setting].shaderMacro.push_back(Shader::DefineMacro{ L"SAMPLE_LAMBDA_NUM", to_wstring(mLensFlareComputeInformation.SAMPLE_LAMBDA_NUM) });
 		mShaderSettingComputeTbl[setting].shaderMacro.push_back(Shader::DefineMacro{ L"LAMBDA_NM_RED", to_wstring(mLensFlareComputeInformation.LAMBDA_NM_RED) });
 		mShaderSettingComputeTbl[setting].shaderMacro.push_back(Shader::DefineMacro{ L"LAMBDA_NM_BLUE", to_wstring(mLensFlareComputeInformation.LAMBDA_NM_BLUE) });
+		mShaderSettingComputeTbl[setting].shaderMacro.push_back(Shader::DefineMacro{ L"LENS_NAME_MAX", to_wstring(LENS_NAME_MAX) });
 		mShaderSettingComputeTbl[setting].descriptorKeys.push_back("computeConstants");
+		mShaderSettingComputeTbl[setting].descriptorKeys.push_back("lensBank");
 		mShaderSettingComputeTbl[setting].descriptorKeys.push_back("traceResult");
 		mShaderSettingComputeTbl[setting].descriptorKeys.push_back("lensInterface");
 		mShaderSettingComputeTbl[setting].descriptorKeys.push_back("ghostData");
-		mShaderSettingComputeTbl[setting].descriptors["computeConstants"] = DescriptorInfo{ true, 0 };
-		mShaderSettingComputeTbl[setting].descriptors["traceResult"] = DescriptorInfo{ false, 1, D3D12_DESCRIPTOR_RANGE{ D3D12_DESCRIPTOR_RANGE_TYPE_UAV, 1, 0} };
-		mShaderSettingComputeTbl[setting].descriptors["lensInterface"] = DescriptorInfo{ false, 2, D3D12_DESCRIPTOR_RANGE{ D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0} };
-		mShaderSettingComputeTbl[setting].descriptors["ghostData"] = DescriptorInfo{ false, 3, D3D12_DESCRIPTOR_RANGE{ D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 1} };	
+		mShaderSettingComputeTbl[setting].descriptors["computeConstants"] = DescriptorInfo{ true, 0, D3D12_DESCRIPTOR_RANGE{ D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0} };
+		mShaderSettingComputeTbl[setting].descriptors["lensBank"] = DescriptorInfo{ true, 1, D3D12_DESCRIPTOR_RANGE{ D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 1} };
+		mShaderSettingComputeTbl[setting].descriptors["traceResult"] = DescriptorInfo{ false, 2, D3D12_DESCRIPTOR_RANGE{ D3D12_DESCRIPTOR_RANGE_TYPE_UAV, 1, 0} };
+		mShaderSettingComputeTbl[setting].descriptors["lensInterface"] = DescriptorInfo{ false, 3, D3D12_DESCRIPTOR_RANGE{ D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0} };
+		mShaderSettingComputeTbl[setting].descriptors["ghostData"] = DescriptorInfo{ false, 4, D3D12_DESCRIPTOR_RANGE{ D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 1} };	
 		setting = ShaderNameCompute_TraceRayAR;
 		mShaderSettingComputeTbl[setting].shaderFileName = L"simulateLensFlareRayTracing.hlsl";
 		mShaderSettingComputeTbl[setting].shaderEntryPoint = L"rayTraceCS";
@@ -43,14 +46,17 @@ void PBLensFlare::setupComputePipeline()
 		mShaderSettingComputeTbl[setting].shaderMacro.push_back(Shader::DefineMacro{ L"LAMBDA_NM_RED", to_wstring(mLensFlareComputeInformation.LAMBDA_NM_RED) });
 		mShaderSettingComputeTbl[setting].shaderMacro.push_back(Shader::DefineMacro{ L"LAMBDA_NM_BLUE", to_wstring(mLensFlareComputeInformation.LAMBDA_NM_BLUE) });
 		mShaderSettingComputeTbl[setting].shaderMacro.push_back(Shader::DefineMacro{ L"AR_CORTING", to_wstring(1) });
+		mShaderSettingComputeTbl[setting].shaderMacro.push_back(Shader::DefineMacro{ L"LENS_NAME_MAX", to_wstring(LENS_NAME_MAX) });
 		mShaderSettingComputeTbl[setting].descriptorKeys.push_back("computeConstants");
+		mShaderSettingComputeTbl[setting].descriptorKeys.push_back("lensBank");
 		mShaderSettingComputeTbl[setting].descriptorKeys.push_back("traceResult");
 		mShaderSettingComputeTbl[setting].descriptorKeys.push_back("lensInterface");
 		mShaderSettingComputeTbl[setting].descriptorKeys.push_back("ghostData");
-		mShaderSettingComputeTbl[setting].descriptors["computeConstants"] = DescriptorInfo{ true, 0 };
-		mShaderSettingComputeTbl[setting].descriptors["traceResult"] = DescriptorInfo{ false, 1, D3D12_DESCRIPTOR_RANGE{ D3D12_DESCRIPTOR_RANGE_TYPE_UAV, 1, 0} };
-		mShaderSettingComputeTbl[setting].descriptors["lensInterface"] = DescriptorInfo{ false, 2, D3D12_DESCRIPTOR_RANGE{ D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0} };
-		mShaderSettingComputeTbl[setting].descriptors["ghostData"] = DescriptorInfo{ false, 3, D3D12_DESCRIPTOR_RANGE{ D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 1} };
+		mShaderSettingComputeTbl[setting].descriptors["computeConstants"] = DescriptorInfo{ true, 0, D3D12_DESCRIPTOR_RANGE{ D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0} };
+		mShaderSettingComputeTbl[setting].descriptors["lensBank"] = DescriptorInfo{ true, 1, D3D12_DESCRIPTOR_RANGE{ D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 1} };
+		mShaderSettingComputeTbl[setting].descriptors["traceResult"] = DescriptorInfo{ false, 2, D3D12_DESCRIPTOR_RANGE{ D3D12_DESCRIPTOR_RANGE_TYPE_UAV, 1, 0} };
+		mShaderSettingComputeTbl[setting].descriptors["lensInterface"] = DescriptorInfo{ false, 3, D3D12_DESCRIPTOR_RANGE{ D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0} };
+		mShaderSettingComputeTbl[setting].descriptors["ghostData"] = DescriptorInfo{ false, 4, D3D12_DESCRIPTOR_RANGE{ D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 1} };
 	}
 
 	{

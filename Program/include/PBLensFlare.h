@@ -71,8 +71,6 @@ private:
 
 	enum GridNum
 	{
-		GridNum_4x4,
-		GridNum_8x8,
 		GridNum_16x16,
 		GridNum_32x32,
 		GridNum_64x64
@@ -441,9 +439,11 @@ private:
 	LensDescription mLensDescription;
 	LensFlareAppInformationForCompute mLensFlareComputeInformation;
 	RayBundle mRayBundle;
+	RayBundle mReducedRayBundle;
 
 	//Constant Buffer
 	std::vector<Buffer> mTracingCB;
+	std::vector<Buffer> mLensBank;
 	std::vector<Buffer> mDrawBurstCB;
 	std::vector<Buffer> mDrawingCB;
 	std::vector<Buffer> mFRFCB;

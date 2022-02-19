@@ -67,7 +67,13 @@ struct CBuffer
     float3 padding;
 };
 
+struct LensBank
+{
+    Lens data[LENS_NAME_MAX];
+};
+
 ConstantBuffer<CBuffer> computeConstants : register(b0);
+ConstantBuffer<LensBank> lensBank : register(b1);
 
 RWStructuredBuffer<PSInput> traceResult : register(u0);
 
@@ -230,13 +236,8 @@ void computeTracedRay(inout Ray r, float lambdaNM, int2 bounces, DispersionCurve
         int n0Idx = r.dir.z < 0.f ? F.n.x : F.n.z;
         int n2Idx = r.dir.z < 0.f ? F.n.z : F.n.x;
         
-        Lens lens0, lens2;
-        
-        constructLens(lens0, n0Idx);
-        //if idx < 0, it is AIR(n = 1)
-        float n0 = n0Idx >= 0 ? lens0.coef.computeRefIndex(lambdaNM * 1e-3) : 1;
-        constructLens(lens2, n2Idx);
-        float n2 = n2Idx >= 0 ? lens2.coef.computeRefIndex(lambdaNM * 1e-3) : 1;
+        float n0 = n0Idx >= 0 ? lensBank.data[n0Idx].coef.computeRefIndex(lambdaNM * 1e-3) : 1;
+        float n2 = n2Idx >= 0 ? lensBank.data[n2Idx].coef.computeRefIndex(lambdaNM * 1e-3) : 1;
         
 #ifdef AR_CORTING
         float n1 = max(sqrt(n0 * n2), 1.38);
