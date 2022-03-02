@@ -63,8 +63,15 @@ public:
 		D3D12_DESCRIPTOR_RANGE descriptorRange;
 	};
 
+	enum PipelineType
+	{
+		PipelineType_Graphics,
+		PipelineType_Compute
+	};
+
 	struct ShaderSettingGraphics
 	{
+		const PipelineType pipelineType = PipelineType_Graphics;
 		std::wstring shaderFileNameVS;
 		std::wstring shaderEntryPointVS;
 		std::wstring shaderFileNamePS;
@@ -92,6 +99,7 @@ public:
 
 	struct ShaderSettingCompute
 	{
+		const PipelineType pipelineType = PipelineType_Compute;
 		std::wstring shaderFileName;
 		std::wstring shaderEntryPoint;
 		std::string nameAtPipeline;
@@ -225,6 +233,15 @@ protected:
 	void prepareImGui();
 	void cleanupImGui();
 
+	void setPipelineState(const PipelineType type, const s32 pass);
+	void setPipelineConstantResource(const std::string resourceName, const D3D12_GPU_VIRTUAL_ADDRESS bufferLocation);
+	void setPipelineResource(const std::string resourceName, const D3D12_GPU_DESCRIPTOR_HANDLE baseDescriptor);
+	void dispatch(const u32 x, const u32 y, const u32 z);
+	void setIndexBuffer(const D3D12_INDEX_BUFFER_VIEW* ivViewPtr);
+	void setPrimitiveTopology(const D3D12_PRIMITIVE_TOPOLOGY topology);
+	void drawIndexedInstanced(const u32 indexCountPerInstance, const u32 instanceCount, const u32 startIndexLocation, const s32 baseVertexLocation, const u32 startInstanceLocation);
+	void setVertexBuffers(const u32 startSlot, const u32 numViews, const D3D12_VERTEX_BUFFER_VIEW* vbViewPtr);
+
 	std::unordered_map<std::string, ComPtr<ID3D12RootSignature>> mSignatureTbl;
 	std::unordered_map<std::string, PipelineState> mPipelineStateTbl;
 	std::vector<ShaderSettingCompute> mShaderSettingComputeTbl;
@@ -258,6 +275,8 @@ protected:
 
 	UINT mFrameIndex;
 
+	PipelineType mPipelineType;
+	s32 mPipelinePass;
 
 	UINT mWidth;
 	UINT mHeight;

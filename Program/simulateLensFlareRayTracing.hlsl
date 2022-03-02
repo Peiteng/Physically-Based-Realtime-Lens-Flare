@@ -295,6 +295,20 @@ float theta(float2 v1, float2 v2)
     return acos(dot(v1, v2) / (length(v1) * length(v2)));
 }
 
+//   A   B
+//  C  D
+float quadSurface(float2 A, float2 B, float2 C, float2 D)
+{
+    float a = length(A - B);
+    float b = length(A - C);
+    float c = length(D - C);
+    float d = length(D - B);
+    float s = (a + b + c + d) / 2;
+    float ccos = cos((theta(A - B, A - C) + theta(D - C, D - B)) / 2);
+    ccos *= ccos;
+    return sqrt((s - a) * (s - b) * (s - c) * (s - d) - a * b * c * d * ccos);
+}
+
 float GetRegion(int2 rayID2D, int offsetAtBuffer)
 {
     //↓ray pos
@@ -302,34 +316,21 @@ float GetRegion(int2 rayID2D, int offsetAtBuffer)
     //D E F
     //G H I
     
-    float4 posA = traceResult[GetOffsetAtOneGhost(rayID2D + int2(-1, 1)) + offsetAtBuffer].pos;
-    float4 posB = traceResult[GetOffsetAtOneGhost(rayID2D + int2(0, 1)) + offsetAtBuffer].pos;
-    float4 posC = traceResult[GetOffsetAtOneGhost(rayID2D + int2(1, 1)) + offsetAtBuffer].pos;
-    float4 posD = traceResult[GetOffsetAtOneGhost(rayID2D + int2(-1, 0)) + offsetAtBuffer].pos;
-    float4 posE = traceResult[GetOffsetAtOneGhost(rayID2D + int2(0, 0)) + offsetAtBuffer].pos;
-    float4 posF = traceResult[GetOffsetAtOneGhost(rayID2D + int2(1, 0)) + offsetAtBuffer].pos;
-    float4 posG = traceResult[GetOffsetAtOneGhost(rayID2D + int2(-1, -1)) + offsetAtBuffer].pos;
-    float4 posH = traceResult[GetOffsetAtOneGhost(rayID2D + int2(0, -1)) + offsetAtBuffer].pos;
-    float4 posI = traceResult[GetOffsetAtOneGhost(rayID2D + int2(1, -1)) + offsetAtBuffer].pos;
-
-    float2 vecDA = posD.xy - posA.xy, vecDE = posD.xy - posE.xy;
-    float2 vecBA = posB.xy - posA.xy, vecBE = posB.xy - posE.xy;
-    float2 vecEB = posE.xy - posB.xy, vecEF = posE.xy - posF.xy;
-    float2 vecCB = posC.xy - posB.xy, vecCF = posC.xy - posF.xy;
-    float2 vecGD = posG.xy - posD.xy, vecGH = posG.xy - posH.xy;
-    float2 vecED = posE.xy - posD.xy, vecEH = posE.xy - posH.xy;
-    float2 vecHE = posH.xy - posE.xy, vecHI = posH.xy - posI.xy;
-    float2 vecFE = posF.xy - posE.xy, vecFI = posF.xy - posI.xy;
-    
-    float ab = length(vecBA), bc = length(vecCB), ad = length(vecDA), be = length(vecBE);
-    float cf = length(vecCF), de = length(vecDE), ef = length(vecEF), dg = length(vecGD);
-    float eh = length(vecEH), fi = length(vecFI), gh = length(vecGH), hi = length(vecHI);
+    float2 posA = traceResult[GetOffsetAtOneGhost(rayID2D + int2(-1, 1)) + offsetAtBuffer].pos.xy;
+    float2 posB = traceResult[GetOffsetAtOneGhost(rayID2D + int2(0, 1)) + offsetAtBuffer].pos.xy;
+    float2 posC = traceResult[GetOffsetAtOneGhost(rayID2D + int2(1, 1)) + offsetAtBuffer].pos.xy;
+    float2 posD = traceResult[GetOffsetAtOneGhost(rayID2D + int2(-1, 0)) + offsetAtBuffer].pos.xy;
+    float2 posE = traceResult[GetOffsetAtOneGhost(rayID2D + int2(0, 0)) + offsetAtBuffer].pos.xy;
+    float2 posF = traceResult[GetOffsetAtOneGhost(rayID2D + int2(1, 0)) + offsetAtBuffer].pos.xy;
+    float2 posG = traceResult[GetOffsetAtOneGhost(rayID2D + int2(-1, -1)) + offsetAtBuffer].pos.xy;
+    float2 posH = traceResult[GetOffsetAtOneGhost(rayID2D + int2(0, -1)) + offsetAtBuffer].pos.xy;
+    float2 posI = traceResult[GetOffsetAtOneGhost(rayID2D + int2(1, -1)) + offsetAtBuffer].pos.xy;
     
     const float ep = 0.00001;
-    float Region = quadSurface(ab, bc, ad, be, theta(vecDA, vecDE), theta(vecBA, vecBE)) * (!(rayID2D.x == 0) && !(rayID2D.y == (GRID_DIV - 1)));
-    Region += quadSurface(bc, be, cf, ef, theta(vecEB, vecEF), theta(vecCB, vecCF)) * (!(rayID2D.x == (GRID_DIV - 1)) && !(rayID2D.y == (GRID_DIV - 1)));
-    Region += quadSurface(dg, gh, de, eh, theta(vecGD, vecGH), theta(vecED, vecEH)) * (!(rayID2D.x == 0) && !(rayID2D.y == 0));
-    Region += quadSurface(eh, hi, ef, fi, theta(vecHE, vecHI), theta(vecFE, vecFI)) * (!(rayID2D.x == (GRID_DIV - 1)) && !(rayID2D.y == 0));
+    float Region = quadSurface(posA, posB, posD, posE) * (!(rayID2D.x == 0) && !(rayID2D.y == (GRID_DIV - 1)));
+    Region += quadSurface(posB, posC, posE, posF) * (!(rayID2D.x == (GRID_DIV - 1)) && !(rayID2D.y == (GRID_DIV - 1)));
+    Region += quadSurface(posD, posE, posG, posH) * (!(rayID2D.x == 0) && !(rayID2D.y == 0));
+    Region += quadSurface(posE, posF, posH, posI) * (!(rayID2D.x == (GRID_DIV - 1)) && !(rayID2D.y == 0));
     Region += ep;
     
     float BaseGridWidth = computeConstants.spread / (float) GRID_DIV;

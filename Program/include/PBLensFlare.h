@@ -110,7 +110,6 @@ private:
 	};
 
 	struct RayBundle {
-		s32 suvdiv;
 		Buffer indexBuffer;
 		D3D12_INDEX_BUFFER_VIEW  indexBufferView;
 		DX12Buffer vertexBuffer;

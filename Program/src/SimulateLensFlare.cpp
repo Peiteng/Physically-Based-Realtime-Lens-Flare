@@ -89,64 +89,52 @@ void PBLensFlare::setupDrawing(DescriptorHandle rtv, DescriptorHandle dsv)
 void PBLensFlare::traceRay()
 {
 	PIXBeginEvent(mCommandList.Get(), 0, "traceRay");
-	const u32 pass = mUseAR ? ShaderNameCompute_TraceRayAR : ShaderNameCompute_TraceRay;
-	mCommandList->SetComputeRootSignature(mSignatureTbl[mShaderSettingComputeTbl[pass].nameAtPipeline].Get());
-	mCommandList->SetComputeRootConstantBufferView(mShaderSettingComputeTbl[pass].descriptors["computeConstants"].rootParamIndex, mTracingCB[0]->GetGPUVirtualAddress());
-	mCommandList->SetComputeRootConstantBufferView(mShaderSettingComputeTbl[pass].descriptors["lensBank"].rootParamIndex, mLensBank[0]->GetGPUVirtualAddress());
-	mCommandList->SetComputeRootDescriptorTable(mShaderSettingComputeTbl[pass].descriptors["traceResult"].rootParamIndex, mRayBundle.vertexBuffer.getUAV(mCommandList));
-	mCommandList->SetComputeRootDescriptorTable(mShaderSettingComputeTbl[pass].descriptors["lensInterface"].rootParamIndex, mLensInterfaceBuffer.getSRV(mCommandList));
-	mCommandList->SetComputeRootDescriptorTable(mShaderSettingComputeTbl[pass].descriptors["ghostData"].rootParamIndex, mGhostDataBuffer.getSRV(mCommandList));
-	mCommandList->SetPipelineState(mPipelineStateTbl[mShaderSettingComputeTbl[pass].nameAtPipeline].Get());
-	//0 <= groupID.x < NumGhosts * NUM_GROUPS
-	//0 <= groupID.y < NUM_GROUPS
-	//0 <= groupID.z < SAMPLE_LAMBDA_NUM
-	mCommandList->Dispatch((unsigned)mLensDescription.NumGhosts * mLensFlareComputeInformation.NUM_GROUPS, (unsigned)mLensFlareComputeInformation.NUM_GROUPS, mLensFlareComputeInformation.SAMPLE_LAMBDA_NUM);
+	setPipelineState(PipelineType_Compute, mUseAR ? ShaderNameCompute_TraceRayAR : ShaderNameCompute_TraceRay);
+	setPipelineConstantResource("computeConstants", mTracingCB[0]->GetGPUVirtualAddress());
+	setPipelineConstantResource("lensBank", mLensBank[0]->GetGPUVirtualAddress());
+	setPipelineResource("traceResult", mRayBundle.vertexBuffer.getUAV(mCommandList));
+	setPipelineResource("lensInterface", mLensInterfaceBuffer.getSRV(mCommandList));
+	setPipelineResource("ghostData", mGhostDataBuffer.getSRV(mCommandList));
+	dispatch((unsigned)mLensDescription.NumGhosts * mLensFlareComputeInformation.NUM_GROUPS, (unsigned)mLensFlareComputeInformation.NUM_GROUPS, mLensFlareComputeInformation.SAMPLE_LAMBDA_NUM);
 	PIXEndEvent(mCommandList.Get());
 }
 
 void PBLensFlare::addGhosts(bool wireFrame)
 {
 	PIXBeginEvent(mCommandList.Get(), 0, wireFrame ? "addGhostsWire" : "addGhosts");
-	u32 pass = wireFrame ? ShaderNameGraphics_AddGhostsWireFrame : ShaderNameGraphics_AddGhosts;
-	mCommandList->SetGraphicsRootSignature(mSignatureTbl[mShaderSettingGraphicsTbl[pass].nameAtPipeline].Get());
-	mCommandList->SetGraphicsRootConstantBufferView(mShaderSettingGraphicsTbl[pass].descriptors["computeConstants"].rootParamIndex, mDrawingCB[0]->GetGPUVirtualAddress());
-	mCommandList->SetGraphicsRootDescriptorTable(mShaderSettingGraphicsTbl[pass].descriptors["texture"].rootParamIndex, mGhostCachedTex.getSRV(mCommandList));
-	mCommandList->SetGraphicsRootDescriptorTable(mShaderSettingGraphicsTbl[pass].descriptors["traceResult"].rootParamIndex, mRayBundle.vertexBuffer.getSRV(mCommandList));
-	mCommandList->IASetIndexBuffer(&mRayBundle.indexBufferView);
-	mCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	mCommandList->SetPipelineState(mPipelineStateTbl[mShaderSettingGraphicsTbl[pass].nameAtPipeline].Get());
-	mCommandList->DrawIndexedInstanced((unsigned)mLensFlareComputeInformation.NUM_VERTICES_PER_BUNDLES * 3 * 2, mLensDescription.NumGhosts, 0, 0, 0);
-	//mCommandList->DrawIndexedInstanced(1, 1, 0, 0, 0);
+	setPipelineState(PipelineType_Graphics, wireFrame ? ShaderNameGraphics_AddGhostsWireFrame : ShaderNameGraphics_AddGhosts);
+	setPipelineConstantResource("computeConstants", mDrawingCB[0]->GetGPUVirtualAddress());
+	setPipelineResource("texture", mGhostCachedTex.getSRV(mCommandList));
+	setPipelineResource("traceResult", mRayBundle.vertexBuffer.getSRV(mCommandList));
+	setIndexBuffer(&mRayBundle.indexBufferView);
+	setPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	drawIndexedInstanced((unsigned)mLensFlareComputeInformation.NUM_VERTICES_PER_BUNDLES * 3 * 2, mLensDescription.NumGhosts, 0, 0, 0);
 	PIXEndEvent(mCommandList.Get());
 }
 
 void PBLensFlare::addGhostsUV()
 {
 	PIXBeginEvent(mCommandList.Get(), 0, "addGhostsUV");
-	const u32 pass = ShaderNameGraphics_AddGhostsUV;
-	mCommandList->SetGraphicsRootSignature(mSignatureTbl[mShaderSettingGraphicsTbl[pass].nameAtPipeline].Get());
-	mCommandList->SetGraphicsRootConstantBufferView(mShaderSettingGraphicsTbl[pass].descriptors["computeConstants"].rootParamIndex, mDrawingCB[0]->GetGPUVirtualAddress());
-	mCommandList->SetGraphicsRootDescriptorTable(mShaderSettingGraphicsTbl[pass].descriptors["texture"].rootParamIndex, mGhostCachedTex.getSRV(mCommandList));
-	mCommandList->SetGraphicsRootDescriptorTable(mShaderSettingGraphicsTbl[pass].descriptors["traceResult"].rootParamIndex, mRayBundle.vertexBuffer.getSRV(mCommandList));
-	mCommandList->IASetIndexBuffer(&mRayBundle.indexBufferView);
-	mCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	mCommandList->SetPipelineState(mPipelineStateTbl[mShaderSettingGraphicsTbl[pass].nameAtPipeline].Get());
-	mCommandList->DrawIndexedInstanced((unsigned)mLensFlareComputeInformation.NUM_VERTICES_PER_BUNDLES * 3 * 2, mLensDescription.NumGhosts, 0, 0, 0);
+	setPipelineState(PipelineType_Graphics, ShaderNameGraphics_AddGhostsUV);
+	setPipelineConstantResource("computeConstants", mDrawingCB[0]->GetGPUVirtualAddress());
+	setPipelineResource("texture", mGhostCachedTex.getSRV(mCommandList));
+	setPipelineResource("traceResult", mRayBundle.vertexBuffer.getSRV(mCommandList));
+	setIndexBuffer(&mRayBundle.indexBufferView);
+	setPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	drawIndexedInstanced((unsigned)mLensFlareComputeInformation.NUM_VERTICES_PER_BUNDLES * 3 * 2, mLensDescription.NumGhosts, 0, 0, 0);
 	PIXEndEvent(mCommandList.Get());
 }
 
 void PBLensFlare::addBurst()
 {
 	PIXBeginEvent(mCommandList.Get(), 0, "addStarBurst");
-	const u32 pass = SahderNameGraphics_AddStarBurst;
-	mCommandList->SetGraphicsRootSignature(mSignatureTbl[mShaderSettingGraphicsTbl[pass].nameAtPipeline].Get());
-	mCommandList->SetGraphicsRootConstantBufferView(mShaderSettingGraphicsTbl[pass].descriptors["computeConstants"].rootParamIndex, mDrawBurstCB[0]->GetGPUVirtualAddress());
-	mCommandList->SetGraphicsRootDescriptorTable(mShaderSettingGraphicsTbl[pass].descriptors["texture"].rootParamIndex, mBurstCachedTex.getSRV(mCommandList));
-	mCommandList->IASetIndexBuffer(&mStarBurstQuad.ibView);
-	mCommandList->IASetVertexBuffers(0, 1, &mStarBurstQuad.vbView);
-	mCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
-	mCommandList->SetPipelineState(mPipelineStateTbl[mShaderSettingGraphicsTbl[pass].nameAtPipeline].Get());
-	mCommandList->DrawIndexedInstanced(4, 1, 0, 0, 0);
+	setPipelineState(PipelineType_Graphics, SahderNameGraphics_AddStarBurst);
+	setPipelineConstantResource("computeConstants", mDrawBurstCB[0]->GetGPUVirtualAddress());
+	setPipelineResource("texture", mBurstCachedTex.getSRV(mCommandList));
+	setIndexBuffer(&mStarBurstQuad.ibView);
+	setVertexBuffers(0, 1, &mStarBurstQuad.vbView);
+	setPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+	drawIndexedInstanced(4, 1, 0, 0, 0);
 	PIXEndEvent(mCommandList.Get());
 }
 

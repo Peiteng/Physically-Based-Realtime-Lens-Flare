@@ -292,26 +292,7 @@ void  PBLensFlare::constructRayBundle()
 	const s32 GRID_DIV = mLensFlareComputeInformation.GRID_DIV;
 	const s32 NUM_GHOSTS = mLensDescription.NumGhosts;
 
-	const f32 left = -1.0f;
-	const f32 right = 1.0f;
-	const f32 bottom = -1.0f;
-	const f32 top = 1.0f;
-
-	std::vector<vec3> vertices;
 	std::vector<s32> indices;
-	const u32 numVerticesPerGhost = GRID_DIV * GRID_DIV;
-	vertices.resize(GRID_DIV * GRID_DIV * NUM_GHOSTS);
-	for (u32 n = 0; n < NUM_GHOSTS; ++n)
-		for (u32 y = 0; y < GRID_DIV; ++y)
-			for (u32 x = 0; x < GRID_DIV; ++x)
-			{
-				const u32 ghostOffset = n * numVerticesPerGhost;
-				const u32 vertexIDPerGhost = x + y * GRID_DIV;
-				const f32 u = std::lerp(left, right, (f32)x / (f32)(GRID_DIV - 1));
-				const f32 v = std::lerp(top, bottom, (f32)y / (f32)(GRID_DIV - 1));
-				vertices[ghostOffset + vertexIDPerGhost] = vec3(u, v, 0);
-			}
-
 	u32 indexOffset = 0;
 	const u32 vertNum = 6;
 	const u32 numIndicesPerGhost = (GRID_DIV - 1) * (GRID_DIV - 1) * vertNum;
@@ -341,15 +322,13 @@ void  PBLensFlare::constructRayBundle()
 			indexOffset++;
 		}
 
-	mRayBundle.suvdiv = GRID_DIV;
-
 	auto indexBufferSize = UINT(sizeof(UINT) * indices.size());
 	createIndexBuffer(mRayBundle.indexBuffer, indexBufferSize, indices.data());
 	mRayBundle.indexBufferView.BufferLocation = mRayBundle.indexBuffer->GetGPUVirtualAddress();
 	mRayBundle.indexBufferView.Format = DXGI_FORMAT_R32_UINT;
 	mRayBundle.indexBufferView.SizeInBytes = indexBufferSize;
 
-	const s32 verticesNum = vertices.size();
+	const s32 verticesNum = GRID_DIV * GRID_DIV * NUM_GHOSTS;
 	auto vertexSize = sizeof(PSInput);
 	auto vertexBufferSize = appUtility::roundupBufferSize(vertexSize * verticesNum);
 	auto vertexDesc = CD3DX12_RESOURCE_DESC::Buffer(vertexBufferSize);

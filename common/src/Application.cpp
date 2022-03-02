@@ -441,7 +441,7 @@ void Application::waitForIdleGPU()
 	ComPtr<ID3D12Fence1> fence;
 	const UINT64 expectValue = 1;
 	HRESULT hr = mDevice->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence));
-	ThrowIfFailed(hr, "CreateFence 失敗");
+	ThrowIfFailed(hr, "CreateFence Failed");
 
 	mCommandQueue->Signal(fence.Get(), expectValue);
 	if (fence->GetCompletedValue() != expectValue)
@@ -646,7 +646,7 @@ void Application::setupGraphicsPipelineAndSignature(vector<CD3DX12_STATIC_SAMPLE
 		if (!settings.shaderFileNamePS.empty() && isVSValid)
 		{
 			isPSValid = shaderPS.load(settings.shaderFileNamePS, Shader::Pixel, settings.shaderEntryPointPS, settings.flags, settings.shaderMacroPS);
-			if (!isVSValid)
+			if (!isPSValid)
 			{
 				errShader.shaderFileName = settings.shaderFileNamePS;
 				errShader.shaderEntryPoint = settings.shaderEntryPointPS;
@@ -657,7 +657,7 @@ void Application::setupGraphicsPipelineAndSignature(vector<CD3DX12_STATIC_SAMPLE
 		if (!settings.shaderFileNameGS.empty() && isPSValid)
 		{
 			isGSValid = shaderGS.load(settings.shaderFileNameGS, Shader::Geometry, settings.shaderEntryPointGS, settings.flags, settings.shaderMacroGS);
-			if (!isVSValid)
+			if (!isGSValid)
 			{
 				errShader.shaderFileName = settings.shaderFileNameGS;
 				errShader.shaderEntryPoint = settings.shaderEntryPointGS;
@@ -668,7 +668,7 @@ void Application::setupGraphicsPipelineAndSignature(vector<CD3DX12_STATIC_SAMPLE
 		if (!settings.shaderFileNameHS.empty() && isGSValid)
 		{
 			isHSValid = shaderHS.load(settings.shaderFileNameHS, Shader::Hull, settings.shaderEntryPointHS, settings.flags, settings.shaderMacroHS);
-			if (!isVSValid)
+			if (!isHSValid)
 			{
 				errShader.shaderFileName = settings.shaderFileNameHS;
 				errShader.shaderEntryPoint = settings.shaderEntryPointHS;
@@ -679,7 +679,7 @@ void Application::setupGraphicsPipelineAndSignature(vector<CD3DX12_STATIC_SAMPLE
 		if (!settings.shaderFileNameDS.empty() && isHSValid)
 		{
 			isDSValid = shaderDS.load(settings.shaderFileNameDS, Shader::Domain, settings.shaderEntryPointDS, settings.flags, settings.shaderMacroDS);
-			if (!isVSValid)
+			if (!isDSValid)
 			{
 				errShader.shaderFileName = settings.shaderFileNameDS;
 				errShader.shaderEntryPoint = settings.shaderEntryPointDS;
@@ -739,11 +739,6 @@ void Application::initBufferByResource(DX12Buffer& targetBuffer, const u32 buffe
 
 	command->CopyResource(targetBuffer.getBuffer().Get(), upload.Get());
 
-	D3D12_RESOURCE_BARRIER barrierFromDEST = CD3DX12_RESOURCE_BARRIER::Transition(
-		targetBuffer.getBuffer().Get(),
-		D3D12_RESOURCE_STATE_COPY_DEST,
-		firstState);
-
 	command->ResourceBarrier(1, &barrier[1]);
 	finishCommandList(command);
 }
@@ -765,4 +760,63 @@ void Application::createIndexBuffer(Buffer& indexBuffer, const u32 bufferSize, c
 
 	command->ResourceBarrier(1, &barrierFromDEST);
 	finishCommandList(command);
+}
+
+void Application::setPipelineState(const PipelineType type, const s32 pass)
+{
+	mPipelineType = type;
+	mPipelinePass = pass;
+
+	if (mPipelineType == PipelineType_Compute)
+	{
+		mCommandList->SetComputeRootSignature(mSignatureTbl[mShaderSettingComputeTbl[mPipelinePass].nameAtPipeline].Get());
+		mCommandList->SetPipelineState(mPipelineStateTbl[mShaderSettingComputeTbl[mPipelinePass].nameAtPipeline].Get());
+	}
+	else
+	{
+		mCommandList->SetGraphicsRootSignature(mSignatureTbl[mShaderSettingGraphicsTbl[mPipelinePass].nameAtPipeline].Get());
+		mCommandList->SetPipelineState(mPipelineStateTbl[mShaderSettingGraphicsTbl[mPipelinePass].nameAtPipeline].Get());
+	}
+}
+void Application::setPipelineConstantResource(const std::string resourceName, const D3D12_GPU_VIRTUAL_ADDRESS bufferLocation)
+{
+	if (mPipelineType == PipelineType_Compute)
+	{
+		mCommandList->SetComputeRootConstantBufferView(mShaderSettingComputeTbl[mPipelinePass].descriptors[resourceName].rootParamIndex, bufferLocation);
+	}
+	else
+	{
+		mCommandList->SetGraphicsRootConstantBufferView(mShaderSettingGraphicsTbl[mPipelinePass].descriptors[resourceName].rootParamIndex, bufferLocation);
+	}
+}
+void Application::setPipelineResource(const std::string resourceName, const D3D12_GPU_DESCRIPTOR_HANDLE baseDescriptor)
+{
+	if (mPipelineType == PipelineType_Compute)
+	{
+		mCommandList->SetComputeRootDescriptorTable(mShaderSettingComputeTbl[mPipelinePass].descriptors[resourceName].rootParamIndex, baseDescriptor);
+	}
+	else
+	{
+		mCommandList->SetGraphicsRootDescriptorTable(mShaderSettingGraphicsTbl[mPipelinePass].descriptors[resourceName].rootParamIndex, baseDescriptor);
+	}
+}
+void Application::dispatch(const u32 x, const u32 y, const u32 z)
+{
+	mCommandList->Dispatch(x, y, z);
+}
+void Application::setIndexBuffer(const D3D12_INDEX_BUFFER_VIEW* ivViewPtr)
+{
+	mCommandList->IASetIndexBuffer(ivViewPtr);
+}
+void Application::setPrimitiveTopology(const D3D12_PRIMITIVE_TOPOLOGY topology)
+{
+	mCommandList->IASetPrimitiveTopology(topology);
+}
+void Application::drawIndexedInstanced(const u32 indexCountPerInstance, const u32 instanceCount, const u32 startIndexLocation, const s32 baseVertexLocation, const u32 startInstanceLocation)
+{
+	mCommandList->DrawIndexedInstanced(indexCountPerInstance, instanceCount, startIndexLocation, baseVertexLocation, startInstanceLocation);
+}
+void Application::setVertexBuffers(const u32 startSlot, const u32 numViews, const D3D12_VERTEX_BUFFER_VIEW* vbViewPtr)
+{
+	mCommandList->IASetVertexBuffers(startSlot, numViews, vbViewPtr);
 }

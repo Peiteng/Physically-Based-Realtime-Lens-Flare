@@ -81,168 +81,150 @@ void PBLensFlare::generateGhost()
 
 void PBLensFlare::drawFRF(DX12Buffer& Real, DX12Buffer& Image)
 {
-	mCommandList->SetComputeRootSignature(mSignatureTbl[mShaderSettingComputeTbl[ShaderNameCompute_FRF].nameAtPipeline].Get());
-	mCommandList->SetComputeRootConstantBufferView(mShaderSettingComputeTbl[ShaderNameCompute_FRF].descriptors["computeConstants"].rootParamIndex, mFRFCB[0]->GetGPUVirtualAddress());
-	mCommandList->SetComputeRootDescriptorTable(mShaderSettingComputeTbl[ShaderNameCompute_FRF].descriptors["realDistribution"].rootParamIndex, Real.getUAV(mCommandList));
-	mCommandList->SetComputeRootDescriptorTable(mShaderSettingComputeTbl[ShaderNameCompute_FRF].descriptors["imaginaryDistribution"].rootParamIndex, Image.getUAV(mCommandList));
 	PIXBeginEvent(mCommandList.Get(), 0, "drawFRF");
-	mCommandList->SetPipelineState(mPipelineStateTbl[mShaderSettingComputeTbl[ShaderNameCompute_FRF].nameAtPipeline].Get());
-	mCommandList->Dispatch(mTexwidth / mLensFlareComputeInformation.NUM_THREADS, mTexheight / mLensFlareComputeInformation.NUM_THREADS, 1);
+	setPipelineState(PipelineType_Compute, ShaderNameCompute_FRF);
+	setPipelineConstantResource("computeConstants", mFRFCB[0]->GetGPUVirtualAddress());
+	setPipelineResource("realDistribution", Real.getUAV(mCommandList));
+	setPipelineResource("imaginaryDistribution", Image.getUAV(mCommandList));
+	dispatch(mTexwidth / mLensFlareComputeInformation.NUM_THREADS, mTexheight / mLensFlareComputeInformation.NUM_THREADS, 1);
 	PIXEndEvent(mCommandList.Get());
 }
 
 void PBLensFlare::FFT2D(DX12Buffer& Real, DX12Buffer& Image, const bool inverse)
 {
-	const auto passRow = inverse ? ShaderNameCompute_InvFFTrow : ShaderNameCompute_FFTrow;
-	const auto passCol = inverse ? ShaderNameCompute_InvFFTcol : ShaderNameCompute_FFTcol;
-	const auto nameRow = inverse ? "ifftCS_ROW" : "fftCS_ROW";
-	const auto nameCol = inverse ? "ifftCS_COL" : "fftCS_COL";
-
-	mCommandList->SetComputeRootSignature(mSignatureTbl[mShaderSettingComputeTbl[passRow].nameAtPipeline].Get());
-	mCommandList->SetComputeRootDescriptorTable(mShaderSettingComputeTbl[passRow].descriptors["realDistributionSource"].rootParamIndex, Real.getSRV(mCommandList));
-	mCommandList->SetComputeRootDescriptorTable(mShaderSettingComputeTbl[passRow].descriptors["imaginaryDistributionSource"].rootParamIndex, Image.getSRV(mCommandList));
-	mCommandList->SetComputeRootDescriptorTable(mShaderSettingComputeTbl[passRow].descriptors["realDistributionDestination"].rootParamIndex, mRWfullsizeInnerTex.at(2).getUAV(mCommandList));
-	mCommandList->SetComputeRootDescriptorTable(mShaderSettingComputeTbl[passRow].descriptors["imaginaryDistributionDestination"].rootParamIndex, mRWfullsizeInnerTex.at(3).getUAV(mCommandList));
-	PIXBeginEvent(mCommandList.Get(), 0, nameRow);
-	mCommandList->SetPipelineState(mPipelineStateTbl[mShaderSettingComputeTbl[passRow].nameAtPipeline].Get());
-	mCommandList->Dispatch(1, mTexheight, 1);
+	PIXBeginEvent(mCommandList.Get(), 0, inverse ? "ifftCS_ROW" : "fftCS_ROW");
+	setPipelineState(PipelineType_Compute, inverse ? ShaderNameCompute_InvFFTrow : ShaderNameCompute_FFTrow);
+	setPipelineResource("realDistributionSource", Real.getSRV(mCommandList));
+	setPipelineResource("imaginaryDistributionSource", Image.getSRV(mCommandList));
+	setPipelineResource("realDistributionDestination", mRWfullsizeInnerTex.at(2).getUAV(mCommandList));
+	setPipelineResource("imaginaryDistributionDestination", mRWfullsizeInnerTex.at(3).getUAV(mCommandList));
+	dispatch(1, mTexheight, 1);
 	PIXEndEvent(mCommandList.Get());
 
-	mCommandList->SetComputeRootSignature(mSignatureTbl[mShaderSettingComputeTbl[passCol].nameAtPipeline].Get());
-	mCommandList->SetComputeRootDescriptorTable(mShaderSettingComputeTbl[passCol].descriptors["realDistributionSource"].rootParamIndex, mRWfullsizeInnerTex.at(2).getSRV(mCommandList));
-	mCommandList->SetComputeRootDescriptorTable(mShaderSettingComputeTbl[passCol].descriptors["imaginaryDistributionSource"].rootParamIndex, mRWfullsizeInnerTex.at(3).getSRV(mCommandList));
-	mCommandList->SetComputeRootDescriptorTable(mShaderSettingComputeTbl[passCol].descriptors["realDistributionDestination"].rootParamIndex, Real.getUAV(mCommandList));
-	mCommandList->SetComputeRootDescriptorTable(mShaderSettingComputeTbl[passCol].descriptors["imaginaryDistributionDestination"].rootParamIndex, Image.getUAV(mCommandList));
-	PIXBeginEvent(mCommandList.Get(), 0, nameCol);
-	mCommandList->SetPipelineState(mPipelineStateTbl[mShaderSettingComputeTbl[passCol].nameAtPipeline].Get());
-	mCommandList->Dispatch(1, mTexwidth, 1);
+	PIXBeginEvent(mCommandList.Get(), 0, inverse ? "ifftCS_COL" : "fftCS_COL");
+	setPipelineState(PipelineType_Compute, inverse ? ShaderNameCompute_InvFFTcol : ShaderNameCompute_FFTcol);
+	setPipelineResource("realDistributionSource", mRWfullsizeInnerTex.at(2).getSRV(mCommandList));
+	setPipelineResource("imaginaryDistributionSource", mRWfullsizeInnerTex.at(3).getSRV(mCommandList));
+	setPipelineResource("realDistributionDestination", Real.getUAV(mCommandList));
+	setPipelineResource("imaginaryDistributionDestination", Image.getUAV(mCommandList));
+	dispatch(1, mTexheight, 1);
 	PIXEndEvent(mCommandList.Get());
 }
 
 void PBLensFlare::raiseValue(DX12Buffer& InReal, DX12Buffer& InImage, DX12Buffer& OutReal, DX12Buffer& OutImage)
 {
-	mCommandList->SetComputeRootSignature(mSignatureTbl[mShaderSettingComputeTbl[ShaderNameCompute_RaiseValue].nameAtPipeline].Get());
-	mCommandList->SetComputeRootConstantBufferView(mShaderSettingComputeTbl[ShaderNameCompute_RaiseValue].descriptors["computeConstants"].rootParamIndex, mBurstCB[0]->GetGPUVirtualAddress());
-	mCommandList->SetComputeRootDescriptorTable(mShaderSettingComputeTbl[ShaderNameCompute_RaiseValue].descriptors["realDistributionSource"].rootParamIndex, InReal.getSRV(mCommandList));
-	mCommandList->SetComputeRootDescriptorTable(mShaderSettingComputeTbl[ShaderNameCompute_RaiseValue].descriptors["imaginaryDistributionSource"].rootParamIndex, InImage.getSRV(mCommandList));
-	mCommandList->SetComputeRootDescriptorTable(mShaderSettingComputeTbl[ShaderNameCompute_RaiseValue].descriptors["realDistributionDestination"].rootParamIndex, OutReal.getUAV(mCommandList));
-	mCommandList->SetComputeRootDescriptorTable(mShaderSettingComputeTbl[ShaderNameCompute_RaiseValue].descriptors["imaginaryDistributionDestination"].rootParamIndex, OutImage.getUAV(mCommandList));
 	PIXBeginEvent(mCommandList.Get(), 0, "raiseRICS");
-	mCommandList->SetPipelineState(mPipelineStateTbl[mShaderSettingComputeTbl[ShaderNameCompute_RaiseValue].nameAtPipeline].Get());
-	mCommandList->Dispatch(mTexwidth / mLensFlareComputeInformation.NUM_THREADS, mTexheight / mLensFlareComputeInformation.NUM_THREADS, 1);
+	setPipelineState(PipelineType_Compute, ShaderNameCompute_RaiseValue);
+	setPipelineConstantResource("computeConstants", mBurstCB[0]->GetGPUVirtualAddress());
+	setPipelineResource("realDistributionSource", InReal.getSRV(mCommandList));
+	setPipelineResource("imaginaryDistributionSource", InImage.getSRV(mCommandList));
+	setPipelineResource("realDistributionDestination", OutReal.getUAV(mCommandList));
+	setPipelineResource("imaginaryDistributionDestination", OutImage.getUAV(mCommandList));
+	dispatch(mTexwidth / mLensFlareComputeInformation.NUM_THREADS, mTexheight / mLensFlareComputeInformation.NUM_THREADS, 1);
 	PIXEndEvent(mCommandList.Get());
 }
 
 void PBLensFlare::lambdaIntegral(DX12Buffer& InReal, DX12Buffer& InImage, DX12Buffer& OutReal, DX12Buffer& OutImage)
 {
-	mCommandList->SetComputeRootSignature(mSignatureTbl[mShaderSettingComputeTbl[ShaderNameCompute_LambdaIntegral].nameAtPipeline].Get());
-	mCommandList->SetComputeRootConstantBufferView(mShaderSettingComputeTbl[ShaderNameCompute_LambdaIntegral].descriptors["computeConstants"].rootParamIndex, mBurstCB[0]->GetGPUVirtualAddress());
-	mCommandList->SetComputeRootDescriptorTable(mShaderSettingComputeTbl[ShaderNameCompute_LambdaIntegral].descriptors["realDistributionSource"].rootParamIndex, InReal.getSRV(mCommandList));
-	mCommandList->SetComputeRootDescriptorTable(mShaderSettingComputeTbl[ShaderNameCompute_LambdaIntegral].descriptors["imaginaryDistributionSource"].rootParamIndex, InImage.getSRV(mCommandList));
-	mCommandList->SetComputeRootDescriptorTable(mShaderSettingComputeTbl[ShaderNameCompute_LambdaIntegral].descriptors["realDistributionDestination"].rootParamIndex, OutReal.getUAV(mCommandList));
-	mCommandList->SetComputeRootDescriptorTable(mShaderSettingComputeTbl[ShaderNameCompute_LambdaIntegral].descriptors["imaginaryDistributionDestination"].rootParamIndex, OutImage.getUAV(mCommandList));
 	PIXBeginEvent(mCommandList.Get(), 0, "lambdaIntegral");
-	mCommandList->SetPipelineState(mPipelineStateTbl[mShaderSettingComputeTbl[ShaderNameCompute_LambdaIntegral].nameAtPipeline].Get());
-	mCommandList->Dispatch(mTexwidth / mLensFlareComputeInformation.NUM_THREADS, mTexheight / mLensFlareComputeInformation.NUM_THREADS, 1);
+	setPipelineState(PipelineType_Compute, ShaderNameCompute_LambdaIntegral);
+	setPipelineConstantResource("computeConstants", mBurstCB[0]->GetGPUVirtualAddress());
+	setPipelineResource("realDistributionSource", InReal.getSRV(mCommandList));
+	setPipelineResource("imaginaryDistributionSource", InImage.getSRV(mCommandList));
+	setPipelineResource("realDistributionDestination", OutReal.getUAV(mCommandList));
+	setPipelineResource("imaginaryDistributionDestination", OutImage.getUAV(mCommandList));
+	dispatch(mTexwidth / mLensFlareComputeInformation.NUM_THREADS, mTexheight / mLensFlareComputeInformation.NUM_THREADS, 1);
 	PIXEndEvent(mCommandList.Get());
 }
 
 void PBLensFlare::burstFiltering(DX12Buffer& In, DX12Buffer& Out)
 {
-	mCommandList->SetComputeRootSignature(mSignatureTbl[mShaderSettingComputeTbl[ShaderNameCompute_BurstFilter].nameAtPipeline].Get());
-	mCommandList->SetComputeRootConstantBufferView(mShaderSettingComputeTbl[ShaderNameCompute_BurstFilter].descriptors["computeConstants"].rootParamIndex, mBurstCB[0]->GetGPUVirtualAddress());
-	mCommandList->SetComputeRootDescriptorTable(mShaderSettingComputeTbl[ShaderNameCompute_BurstFilter].descriptors["realDistributionSource"].rootParamIndex, In.getSRV(mCommandList));
-	mCommandList->SetComputeRootDescriptorTable(mShaderSettingComputeTbl[ShaderNameCompute_BurstFilter].descriptors["realDistributionDestination"].rootParamIndex, Out.getUAV(mCommandList));
 	PIXBeginEvent(mCommandList.Get(), 0, "spectrumFilterling");
-	mCommandList->SetPipelineState(mPipelineStateTbl[mShaderSettingComputeTbl[ShaderNameCompute_BurstFilter].nameAtPipeline].Get());
-	mCommandList->Dispatch(mTexwidth / mLensFlareComputeInformation.NUM_THREADS, mTexheight / mLensFlareComputeInformation.NUM_THREADS, 1);
+	setPipelineState(PipelineType_Compute, ShaderNameCompute_BurstFilter);
+	setPipelineConstantResource("computeConstants", mBurstCB[0]->GetGPUVirtualAddress());
+	setPipelineResource("realDistributionSource", In.getSRV(mCommandList));
+	setPipelineResource("realDistributionDestination", Out.getUAV(mCommandList));
+	dispatch(mTexwidth / mLensFlareComputeInformation.NUM_THREADS, mTexheight / mLensFlareComputeInformation.NUM_THREADS, 1);
 	PIXEndEvent(mCommandList.Get());
 }
 
 void PBLensFlare::complexMultiply(DX12Buffer& InReal0, DX12Buffer& InImage0, DX12Buffer& InReal1, DX12Buffer& InImage1, DX12Buffer& OutReal, DX12Buffer& OutImage)
 {
-	mCommandList->SetComputeRootSignature(mSignatureTbl[mShaderSettingComputeTbl[ShaderNameCompute_ComplexMultiply].nameAtPipeline].Get());
-	mCommandList->SetComputeRootConstantBufferView(mShaderSettingComputeTbl[ShaderNameCompute_ComplexMultiply].descriptors["computeConstants"].rootParamIndex, mUtilityCB[0]->GetGPUVirtualAddress());
-	mCommandList->SetComputeRootDescriptorTable(mShaderSettingComputeTbl[ShaderNameCompute_ComplexMultiply].descriptors["realDistributionSource"].rootParamIndex, InReal0.getSRV(mCommandList));
-	mCommandList->SetComputeRootDescriptorTable(mShaderSettingComputeTbl[ShaderNameCompute_ComplexMultiply].descriptors["imaginaryDistributionSource"].rootParamIndex, InImage0.getSRV(mCommandList));
-	mCommandList->SetComputeRootDescriptorTable(mShaderSettingComputeTbl[ShaderNameCompute_ComplexMultiply].descriptors["realDistributionDestination0"].rootParamIndex, InReal1.getSRV(mCommandList));
-	mCommandList->SetComputeRootDescriptorTable(mShaderSettingComputeTbl[ShaderNameCompute_ComplexMultiply].descriptors["imaginaryDistributionDestination0"].rootParamIndex, InImage1.getSRV(mCommandList));
-	mCommandList->SetComputeRootDescriptorTable(mShaderSettingComputeTbl[ShaderNameCompute_ComplexMultiply].descriptors["realDistributionDestination1"].rootParamIndex, OutReal.getUAV(mCommandList));
-	mCommandList->SetComputeRootDescriptorTable(mShaderSettingComputeTbl[ShaderNameCompute_ComplexMultiply].descriptors["imaginaryDistributionDestination1"].rootParamIndex, OutImage.getUAV(mCommandList));
 	PIXBeginEvent(mCommandList.Get(), 0, "mulCS");
-	mCommandList->SetPipelineState(mPipelineStateTbl[mShaderSettingComputeTbl[ShaderNameCompute_ComplexMultiply].nameAtPipeline].Get());
-	mCommandList->Dispatch(mTexwidth / mLensFlareComputeInformation.NUM_THREADS, mTexheight / mLensFlareComputeInformation.NUM_THREADS, 1);
+	setPipelineState(PipelineType_Compute, ShaderNameCompute_ComplexMultiply);
+	setPipelineConstantResource("computeConstants", mUtilityCB[0]->GetGPUVirtualAddress());
+	setPipelineResource("realDistributionSource", InReal0.getSRV(mCommandList));
+	setPipelineResource("imaginaryDistributionSource", InImage0.getSRV(mCommandList));
+	setPipelineResource("realDistributionDestination0", InReal1.getSRV(mCommandList));
+	setPipelineResource("imaginaryDistributionDestination0", InImage1.getSRV(mCommandList));
+	setPipelineResource("realDistributionDestination1", OutReal.getUAV(mCommandList));
+	setPipelineResource("imaginaryDistributionDestination1", OutImage.getUAV(mCommandList));
+	dispatch(mTexwidth / mLensFlareComputeInformation.NUM_THREADS, mTexheight / mLensFlareComputeInformation.NUM_THREADS, 1);
 	PIXEndEvent(mCommandList.Get());
 }
 
 void PBLensFlare::multiply(DX12Buffer& In1, DX12Buffer& In2, DX12Buffer& Out)
 {
-	mCommandList->SetComputeRootSignature(mSignatureTbl[mShaderSettingComputeTbl[ShaderNameCompute_Multiply].nameAtPipeline].Get());
-	mCommandList->SetComputeRootConstantBufferView(mShaderSettingComputeTbl[ShaderNameCompute_Multiply].descriptors["computeConstants"].rootParamIndex, mUtilityCB[0]->GetGPUVirtualAddress());
-	mCommandList->SetComputeRootDescriptorTable(mShaderSettingComputeTbl[ShaderNameCompute_Multiply].descriptors["realDistributionSource"].rootParamIndex, In1.getSRV(mCommandList));
-	mCommandList->SetComputeRootDescriptorTable(mShaderSettingComputeTbl[ShaderNameCompute_Multiply].descriptors["imaginaryDistributionSource"].rootParamIndex, In2.getSRV(mCommandList));
-	mCommandList->SetComputeRootDescriptorTable(mShaderSettingComputeTbl[ShaderNameCompute_Multiply].descriptors["realDistributionDestination0"].rootParamIndex, Out.getUAV(mCommandList));
 	PIXBeginEvent(mCommandList.Get(), 0, "MulCS");
-	mCommandList->SetPipelineState(mPipelineStateTbl[mShaderSettingComputeTbl[ShaderNameCompute_Multiply].nameAtPipeline].Get());
-	mCommandList->Dispatch(mTexwidth / mLensFlareComputeInformation.NUM_THREADS, mTexheight / mLensFlareComputeInformation.NUM_THREADS, 1);
+	setPipelineState(PipelineType_Compute, ShaderNameCompute_Multiply);
+	setPipelineConstantResource("computeConstants", mUtilityCB[0]->GetGPUVirtualAddress());
+	setPipelineResource("realDistributionSource", In1.getSRV(mCommandList));
+	setPipelineResource("imaginaryDistributionSource", In2.getSRV(mCommandList));
+	setPipelineResource("realDistributionDestination0", Out.getUAV(mCommandList));
+	dispatch(mTexwidth / mLensFlareComputeInformation.NUM_THREADS, mTexheight / mLensFlareComputeInformation.NUM_THREADS, 1);
 	PIXEndEvent(mCommandList.Get());
 }
 
 void PBLensFlare::whitening(DX12Buffer& In, DX12Buffer& Out)
 {
-	mCommandList->SetComputeRootSignature(mSignatureTbl[mShaderSettingComputeTbl[ShaderNameCompute_TextureWhitening].nameAtPipeline].Get());
-	mCommandList->SetComputeRootConstantBufferView(mShaderSettingComputeTbl[ShaderNameCompute_TextureWhitening].descriptors["computeConstants"].rootParamIndex, mUtilityCB[0]->GetGPUVirtualAddress());
-	mCommandList->SetComputeRootDescriptorTable(mShaderSettingComputeTbl[ShaderNameCompute_TextureWhitening].descriptors["realDistributionSource"].rootParamIndex, In.getSRV(mCommandList));
-	mCommandList->SetComputeRootDescriptorTable(mShaderSettingComputeTbl[ShaderNameCompute_TextureWhitening].descriptors["realDistributionDestination0"].rootParamIndex, Out.getUAV(mCommandList));
 	PIXBeginEvent(mCommandList.Get(), 0, "whitening");
-	mCommandList->SetPipelineState(mPipelineStateTbl[mShaderSettingComputeTbl[ShaderNameCompute_TextureWhitening].nameAtPipeline].Get());
-	mCommandList->Dispatch(mTexwidth / mLensFlareComputeInformation.NUM_THREADS, mTexheight / mLensFlareComputeInformation.NUM_THREADS, 1);
+	setPipelineState(PipelineType_Compute, ShaderNameCompute_TextureWhitening);
+	setPipelineConstantResource("computeConstants", mUtilityCB[0]->GetGPUVirtualAddress());
+	setPipelineResource("realDistributionSource", In.getSRV(mCommandList));
+	setPipelineResource("realDistributionDestination0", Out.getUAV(mCommandList));
+	dispatch(mTexwidth / mLensFlareComputeInformation.NUM_THREADS, mTexheight / mLensFlareComputeInformation.NUM_THREADS, 1);
 	PIXEndEvent(mCommandList.Get());
 }
 
 void PBLensFlare::copy(TextureData& In, DX12Buffer& Out)
 {
-	mCommandList->SetComputeRootSignature(mSignatureTbl[mShaderSettingComputeTbl[ShaderNameCompute_Copy].nameAtPipeline].Get());
-	mCommandList->SetComputeRootConstantBufferView(mShaderSettingComputeTbl[ShaderNameCompute_Copy].descriptors["computeConstants"].rootParamIndex, mUtilityCB[0]->GetGPUVirtualAddress());
-	mCommandList->SetComputeRootDescriptorTable(mShaderSettingComputeTbl[ShaderNameCompute_Copy].descriptors["realDistributionSource"].rootParamIndex, In.SRV);
-	mCommandList->SetComputeRootDescriptorTable(mShaderSettingComputeTbl[ShaderNameCompute_Copy].descriptors["realDistributionDestination0"].rootParamIndex, Out.getUAV(mCommandList));
 	PIXBeginEvent(mCommandList.Get(), 0, "copyCS");
-	mCommandList->SetPipelineState(mPipelineStateTbl[mShaderSettingComputeTbl[ShaderNameCompute_Copy].nameAtPipeline].Get());
-	mCommandList->Dispatch(mTexwidth / mLensFlareComputeInformation.NUM_THREADS, mTexheight / mLensFlareComputeInformation.NUM_THREADS, 1);
+	setPipelineState(PipelineType_Compute, ShaderNameCompute_Copy);
+	setPipelineConstantResource("computeConstants", mUtilityCB[0]->GetGPUVirtualAddress());
+	setPipelineResource("realDistributionSource", In.SRV);
+	setPipelineResource("realDistributionDestination0", Out.getUAV(mCommandList));
+	dispatch(mTexwidth / mLensFlareComputeInformation.NUM_THREADS, mTexheight / mLensFlareComputeInformation.NUM_THREADS, 1);
 	PIXEndEvent(mCommandList.Get());
 }
 
 void PBLensFlare::copy(DX12Buffer& In, DX12Buffer& Out)
 {
-	mCommandList->SetComputeRootSignature(mSignatureTbl[mShaderSettingComputeTbl[ShaderNameCompute_Copy].nameAtPipeline].Get());
-	mCommandList->SetComputeRootConstantBufferView(mShaderSettingComputeTbl[ShaderNameCompute_Copy].descriptors["computeConstants"].rootParamIndex, mUtilityCB[0]->GetGPUVirtualAddress());
-	mCommandList->SetComputeRootDescriptorTable(mShaderSettingComputeTbl[ShaderNameCompute_Copy].descriptors["realDistributionSource"].rootParamIndex, In.getSRV(mCommandList));
-	mCommandList->SetComputeRootDescriptorTable(mShaderSettingComputeTbl[ShaderNameCompute_Copy].descriptors["realDistributionDestination0"].rootParamIndex, Out.getUAV(mCommandList));
 	PIXBeginEvent(mCommandList.Get(), 0, "copyCS");
-	mCommandList->SetPipelineState(mPipelineStateTbl[mShaderSettingComputeTbl[ShaderNameCompute_Copy].nameAtPipeline].Get());
-	mCommandList->Dispatch(mTexwidth / mLensFlareComputeInformation.NUM_THREADS, mTexheight / mLensFlareComputeInformation.NUM_THREADS, 1);
+	setPipelineState(PipelineType_Compute, ShaderNameCompute_Copy);
+	setPipelineConstantResource("computeConstants", mUtilityCB[0]->GetGPUVirtualAddress());
+	setPipelineResource("realDistributionSource", In.getSRV(mCommandList));
+	setPipelineResource("realDistributionDestination0", Out.getUAV(mCommandList));
+	dispatch(mTexwidth / mLensFlareComputeInformation.NUM_THREADS, mTexheight / mLensFlareComputeInformation.NUM_THREADS, 1);
 	PIXEndEvent(mCommandList.Get());
 }
 
 void PBLensFlare::clear(DX12Buffer& Tex)
 {
-	mCommandList->SetComputeRootSignature(mSignatureTbl[mShaderSettingComputeTbl[ShaderNameCompute_Clear].nameAtPipeline].Get());
-	mCommandList->SetComputeRootConstantBufferView(mShaderSettingComputeTbl[ShaderNameCompute_Clear].descriptors["computeConstants"].rootParamIndex, mUtilityCB[0]->GetGPUVirtualAddress());
-	mCommandList->SetComputeRootDescriptorTable(mShaderSettingComputeTbl[ShaderNameCompute_Clear].descriptors["realDistributionDestination0"].rootParamIndex, Tex.getUAV(mCommandList));
 	PIXBeginEvent(mCommandList.Get(), 0, "clearCS");
-	mCommandList->SetPipelineState(mPipelineStateTbl[mShaderSettingComputeTbl[ShaderNameCompute_Clear].nameAtPipeline].Get());
-	mCommandList->Dispatch(mTexwidth / mLensFlareComputeInformation.NUM_THREADS, mTexheight / mLensFlareComputeInformation.NUM_THREADS, 1);
+	setPipelineState(PipelineType_Compute, ShaderNameCompute_Clear);
+	setPipelineConstantResource("computeConstants", mUtilityCB[0]->GetGPUVirtualAddress());
+	setPipelineResource("realDistributionDestination0", Tex.getUAV(mCommandList));
+	dispatch(mTexwidth / mLensFlareComputeInformation.NUM_THREADS, mTexheight / mLensFlareComputeInformation.NUM_THREADS, 1);
 	PIXEndEvent(mCommandList.Get());
 }
 
 void PBLensFlare::polygon(DX12Buffer& Tex)
 {
-	mCommandList->SetComputeRootSignature(mSignatureTbl[mShaderSettingComputeTbl[ShaderNameCompute_Polygon].nameAtPipeline].Get());
-	mCommandList->SetComputeRootConstantBufferView(mShaderSettingComputeTbl[ShaderNameCompute_Polygon].descriptors["computeConstants"].rootParamIndex, mUtilityCB[0]->GetGPUVirtualAddress());
-	mCommandList->SetComputeRootDescriptorTable(mShaderSettingComputeTbl[ShaderNameCompute_Polygon].descriptors["realDistributionDestination0"].rootParamIndex, Tex.getUAV(mCommandList));
 	PIXBeginEvent(mCommandList.Get(), 0, "drawfixpolygonCS");
-	mCommandList->SetPipelineState(mPipelineStateTbl[mShaderSettingComputeTbl[ShaderNameCompute_Polygon].nameAtPipeline].Get());
-	mCommandList->Dispatch(mTexwidth / mLensFlareComputeInformation.NUM_THREADS, mTexheight / mLensFlareComputeInformation.NUM_THREADS, 1);
+	setPipelineState(PipelineType_Compute, ShaderNameCompute_Polygon);
+	setPipelineConstantResource("computeConstants", mUtilityCB[0]->GetGPUVirtualAddress());
+	setPipelineResource("realDistributionDestination0", Tex.getUAV(mCommandList));
+	dispatch(mTexwidth / mLensFlareComputeInformation.NUM_THREADS, mTexheight / mLensFlareComputeInformation.NUM_THREADS, 1);
 	PIXEndEvent(mCommandList.Get());
 }
 
@@ -250,37 +232,34 @@ void PBLensFlare::polygon(DX12Buffer& Tex)
 
 void PBLensFlare::amplitude(DX12Buffer& InReal, DX12Buffer& InImage, DX12Buffer& OutReal, DX12Buffer& OutImage)
 {
-	mCommandList->SetComputeRootSignature(mSignatureTbl[mShaderSettingComputeTbl[ShaderNameCompute_Amplitude].nameAtPipeline].Get());
-	mCommandList->SetComputeRootDescriptorTable(mShaderSettingComputeTbl[ShaderNameCompute_Amplitude].descriptors["realDistributionSource"].rootParamIndex, InReal.getSRV(mCommandList));
-	mCommandList->SetComputeRootDescriptorTable(mShaderSettingComputeTbl[ShaderNameCompute_Amplitude].descriptors["imaginaryDistributionSource"].rootParamIndex, InImage.getSRV(mCommandList));
-	mCommandList->SetComputeRootDescriptorTable(mShaderSettingComputeTbl[ShaderNameCompute_Amplitude].descriptors["realDistributionDestination"].rootParamIndex, OutReal.getUAV(mCommandList));
-	mCommandList->SetComputeRootDescriptorTable(mShaderSettingComputeTbl[ShaderNameCompute_Amplitude].descriptors["imaginaryDistributionDestination"].rootParamIndex, OutImage.getUAV(mCommandList));
 	PIXBeginEvent(mCommandList.Get(), 0, "ampCS");
-	mCommandList->SetPipelineState(mPipelineStateTbl[mShaderSettingComputeTbl[ShaderNameCompute_Amplitude].nameAtPipeline].Get());
-	mCommandList->Dispatch(mTexwidth / mLensFlareComputeInformation.NUM_THREADS, mTexheight / mLensFlareComputeInformation.NUM_THREADS, 1);
+	setPipelineState(PipelineType_Compute, ShaderNameCompute_Amplitude);
+	setPipelineResource("realDistributionSource", InReal.getSRV(mCommandList));
+	setPipelineResource("imaginaryDistributionSource", InImage.getSRV(mCommandList));
+	setPipelineResource("realDistributionDestination", OutReal.getUAV(mCommandList));
+	setPipelineResource("imaginaryDistributionDestination", OutImage.getUAV(mCommandList));
+	dispatch(mTexwidth / mLensFlareComputeInformation.NUM_THREADS, mTexheight / mLensFlareComputeInformation.NUM_THREADS, 1);
 	PIXEndEvent(mCommandList.Get());
 }
 
 void PBLensFlare::intensity(DX12Buffer& InReal, DX12Buffer& InImage, DX12Buffer& OutReal, DX12Buffer& OutImage)
 {
-	mCommandList->SetComputeRootSignature(mSignatureTbl[mShaderSettingComputeTbl[ShaderNameCompute_Intensity].nameAtPipeline].Get());
-	mCommandList->SetComputeRootDescriptorTable(mShaderSettingComputeTbl[ShaderNameCompute_Intensity].descriptors["realDistributionSource"].rootParamIndex, InReal.getSRV(mCommandList));
-	mCommandList->SetComputeRootDescriptorTable(mShaderSettingComputeTbl[ShaderNameCompute_Intensity].descriptors["imaginaryDistributionSource"].rootParamIndex, InImage.getSRV(mCommandList));
-	mCommandList->SetComputeRootDescriptorTable(mShaderSettingComputeTbl[ShaderNameCompute_Intensity].descriptors["realDistributionDestination"].rootParamIndex, OutReal.getUAV(mCommandList));
-	mCommandList->SetComputeRootDescriptorTable(mShaderSettingComputeTbl[ShaderNameCompute_Intensity].descriptors["imaginaryDistributionDestination"].rootParamIndex, OutImage.getUAV(mCommandList));
 	PIXBeginEvent(mCommandList.Get(), 0, "intenCS");
-	mCommandList->SetPipelineState(mPipelineStateTbl[mShaderSettingComputeTbl[ShaderNameCompute_Intensity].nameAtPipeline].Get());
-	mCommandList->Dispatch(mTexwidth / mLensFlareComputeInformation.NUM_THREADS, mTexheight / mLensFlareComputeInformation.NUM_THREADS, 1);
+	setPipelineState(PipelineType_Compute, ShaderNameCompute_Intensity);
+	setPipelineResource("realDistributionSource", InReal.getSRV(mCommandList));
+	setPipelineResource("imaginaryDistributionSource", InImage.getSRV(mCommandList));
+	setPipelineResource("realDistributionDestination", OutReal.getUAV(mCommandList));
+	setPipelineResource("imaginaryDistributionDestination", OutImage.getUAV(mCommandList));
+	dispatch(mTexwidth / mLensFlareComputeInformation.NUM_THREADS, mTexheight / mLensFlareComputeInformation.NUM_THREADS, 1);
 	PIXEndEvent(mCommandList.Get());
 }
 
 void PBLensFlare::oneElem(DX12Buffer& In, DX12Buffer& Out)
 {
-	mCommandList->SetComputeRootSignature(mSignatureTbl[mShaderSettingComputeTbl[ShaderNameCompute_OneElem].nameAtPipeline].Get());
-	mCommandList->SetComputeRootDescriptorTable(mShaderSettingComputeTbl[ShaderNameCompute_OneElem].descriptors["src"].rootParamIndex, In.getSRV(mCommandList));
-	mCommandList->SetComputeRootDescriptorTable(mShaderSettingComputeTbl[ShaderNameCompute_OneElem].descriptors["dst"].rootParamIndex, Out.getUAV(mCommandList));
 	PIXBeginEvent(mCommandList.Get(), 0, "oneElemCS");
-	mCommandList->SetPipelineState(mPipelineStateTbl[mShaderSettingComputeTbl[ShaderNameCompute_OneElem].nameAtPipeline].Get());
+	setPipelineState(PipelineType_Compute, ShaderNameCompute_OneElem);
+	setPipelineResource("src", In.getSRV(mCommandList));
+	setPipelineResource("dst", Out.getUAV(mCommandList));
 	mCommandList->Dispatch(mGhostTexWidth / mLensFlareComputeInformation.NUM_THREADS, mGhostTexHeight / mLensFlareComputeInformation.NUM_THREADS, 1);
 	PIXEndEvent(mCommandList.Get());
 }
