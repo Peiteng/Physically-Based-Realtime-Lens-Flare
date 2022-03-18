@@ -463,10 +463,6 @@ private:
 	DX12Buffer mLensInterfaceBuffer;
 	DX12Buffer mGhostDataBuffer;
 
-	//Target Polygon
-	ModelData mStarBurstQuad;
-	ModelData mFullScreenQuad;
-
 	BackBuffer mBackBuffer;
 
 	//Wave Distribution Texture Cache

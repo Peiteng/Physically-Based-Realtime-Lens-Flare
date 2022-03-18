@@ -100,7 +100,7 @@ void PBLensFlare::setupRayTraceLensFlare()
 	constructConstantBufferForLensFlare();
 	constructLensFlareComponents();
 	constructRayBundle();
-	constructQuad();
+	//constructQuad();
 	constructBackBuffer();
 	setupSimulateLensFlarePipeline();
 }
@@ -369,9 +369,6 @@ void PBLensFlare::constructQuad()
 	  { DirectX::XMFLOAT3(w  + 0, -h, 0.0f), DirectX::XMFLOAT2(1.0f, 1.0f) },
 	};
 	IndexData  quadIndices = { 0, 1, 2, 3, };
-
-	mStarBurstQuad = createSimpleModel(quadVertices, quadIndices);
-	mFullScreenQuad = createSimpleModel(quadVertices, quadIndices);
 }
 
 void PBLensFlare::constructBackBuffer()

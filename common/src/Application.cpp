@@ -812,6 +812,10 @@ void Application::setPrimitiveTopology(const D3D12_PRIMITIVE_TOPOLOGY topology)
 {
 	mCommandList->IASetPrimitiveTopology(topology);
 }
+void Application::drawInstanced(const u32 vertexCountPerInstance, const u32 instanceCount, const u32 startIVertexLocation, const u32 startInstanceLocation)
+{
+	mCommandList->DrawInstanced(vertexCountPerInstance, instanceCount, startIVertexLocation, startInstanceLocation);
+}
 void Application::drawIndexedInstanced(const u32 indexCountPerInstance, const u32 instanceCount, const u32 startIndexLocation, const s32 baseVertexLocation, const u32 startInstanceLocation)
 {
 	mCommandList->DrawIndexedInstanced(indexCountPerInstance, instanceCount, startIndexLocation, baseVertexLocation, startInstanceLocation);

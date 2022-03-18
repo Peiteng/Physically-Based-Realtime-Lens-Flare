@@ -21,22 +21,24 @@ struct StarbustInput
     float3 uv : TEXCOORD0;
 };
 
-// Pixel Shader
-// ----------------------------------------------------------------------------------
-StarbustInput starburstVS(float4 vertexPos : POSITION, uint id : SV_VertexID)
+StarbustInput starburstVS(uint id : SV_VertexID)
 {
     StarbustInput result;
 
     float aspect = computeConstants.backbufferSize.x / computeConstants.backbufferSize.y;
     
-    result.pos = float4(vertexPos.xy * computeConstants.apertureRadius * 0.1, 0.f, 1.f);
-    result.pos.xy += -computeConstants.lightDir.xy * 10;
-    result.pos.xy *= float2(1.f, aspect);
-
-    result.uv.xy = (vertexPos.xy + 1.f) * 0.5f;
-    result.uv.z = 1.f - 2 * lerp(0, 1, length(computeConstants.lightDir.xy));
+    const float2 vertex = float2(id / 2u, id % 2u);
+    StarbustInput Out = (StarbustInput) 0;
+    float2 screenPos = float2(4.0f, -4.0f) * vertex.xy + float2(-1.0f, 1.0f);
+    Out.pos = float4(screenPos, 0.0f, 1.0f);
+    Out.uv.xy = float2(2.0f, 2.0f) * vertex;
     
-    return result;
+    Out.pos.xy += -computeConstants.lightDir.xy * 10;
+    Out.pos.xy *= computeConstants.apertureRadius * 0.1;
+    Out.pos.xy *= float2(1.f, aspect);
+    Out.uv.z = 1.f - 2 * lerp(0, 1, length(computeConstants.lightDir.xy));
+    
+    return Out;
 }
 
 float4 starburstPS(StarbustInput input) : SV_Target

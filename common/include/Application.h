@@ -239,6 +239,7 @@ protected:
 	void dispatch(const u32 x, const u32 y, const u32 z);
 	void setIndexBuffer(const D3D12_INDEX_BUFFER_VIEW* ivViewPtr);
 	void setPrimitiveTopology(const D3D12_PRIMITIVE_TOPOLOGY topology);
+	void drawInstanced(const u32 vertexCountPerInstance, const u32 instanceCount, const u32 startIVertexLocation, const u32 startInstanceLocation);
 	void drawIndexedInstanced(const u32 indexCountPerInstance, const u32 instanceCount, const u32 startIndexLocation, const s32 baseVertexLocation, const u32 startInstanceLocation);
 	void setVertexBuffers(const u32 startSlot, const u32 numViews, const D3D12_VERTEX_BUFFER_VIEW* vbViewPtr);
 

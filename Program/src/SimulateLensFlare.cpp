@@ -131,10 +131,8 @@ void PBLensFlare::addBurst()
 	setPipelineState(PipelineType_Graphics, SahderNameGraphics_AddStarBurst);
 	setPipelineConstantResource("computeConstants", mDrawBurstCB[0]->GetGPUVirtualAddress());
 	setPipelineResource("texture", mBurstCachedTex.getSRV(mCommandList));
-	setIndexBuffer(&mStarBurstQuad.ibView);
-	setVertexBuffers(0, 1, &mStarBurstQuad.vbView);
 	setPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
-	drawIndexedInstanced(4, 1, 0, 0, 0);
+	drawInstanced(3, 1, 0, 0);
 	PIXEndEvent(mCommandList.Get());
 }
 
