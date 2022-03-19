@@ -1,8 +1,7 @@
-Texture2D<float4> realDistributionSource : register(t0);
-Texture2D<float4> imaginaryDistributionSource : register(t1);
+Texture2D<float> realDistributionSource : register(t0);
+Texture2D<float> imaginaryDistributionSource : register(t1);
 
-RWTexture2D<float4> realDistributionDestination : register(u0);
-RWTexture2D<float4> imaginaryDistributionDestination : register(u1);
+RWTexture2D<float> destDestination : register(u0);
 
 SamplerState imageSampler : register(s0);
 
@@ -10,32 +9,24 @@ SamplerState imageSampler : register(s0);
 void amplitude(uint3 dispatchThreadID : SV_DispatchThreadID)
 {
     float2 ID = dispatchThreadID.xy;
-    float3 inputR = realDistributionSource[ID].rgb;
-    float3 inputI = imaginaryDistributionSource[ID].rgb;
+    float inputR = realDistributionSource[ID];
+    float inputI = imaginaryDistributionSource[ID];
 
-	float r = inputR.r * inputR.r + inputI.r * inputI.r;
-	float g = inputR.g * inputR.g + inputI.g * inputI.g;
-	float b = inputR.b * inputR.b + inputI.b * inputI.b;
+	float inten = inputR.r * inputR.r + inputI.r * inputI.r;
 
-	float3 col = float3(sqrt(r), sqrt(g), sqrt(b));
+	float col = sqrt(inten);
 
-    realDistributionDestination[ID] = float4(col, 1.0f);
-    imaginaryDistributionDestination[ID] = float4(col, 1.0f);
+    destDestination[ID] = col;
 }
 
 [numthreads(NUM_THREADS, NUM_THREADS, 1)]
 void intensity(uint3 dispatchThreadID : SV_DispatchThreadID)
 {
     float2 ID = dispatchThreadID.xy;
-    float3 inputR = realDistributionSource[ID].rgb;
-    float3 inputI = imaginaryDistributionSource[ID].rgb;
+    float inputR = realDistributionSource[ID];
+    float inputI = imaginaryDistributionSource[ID];
 
-	float r = inputR.r * inputR.r + inputI.r * inputI.r;
-	float g = inputR.g * inputR.g + inputI.g * inputI.g;
-	float b = inputR.b * inputR.b + inputI.b * inputI.b;
+	float inten = inputR.r * inputR.r + inputI.r * inputI.r;
 
-	float3 col = float3(r, g, b);
-
-    realDistributionDestination[ID] = float4(col, 1.0f);
-    imaginaryDistributionDestination[ID] = float4(col, 1.0f);
+    destDestination[ID] = inten;
 }

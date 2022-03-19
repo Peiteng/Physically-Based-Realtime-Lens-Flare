@@ -26,21 +26,12 @@ void PBLensFlare::generateBurst()
 
 	intensity(
 		mRWFullsizeTex.at(5), mRWFullsizeTex.at(6)
-		, mRWFullsizeTex.at(0), mRWFullsizeTex.at(1));
+		, mRWFullsizeTex.at(0));
 
 	lambdaIntegral(
-		mRWFullsizeTex.at(0), mRWFullsizeTex.at(1)
-		, mRWFullsizeTex.at(2), mRWFullsizeTex.at(3));
-	burstFiltering
-	(mRWFullsizeTex.at(2), mRWFullsizeTex.at(3));
-	raiseValue(
-		mRWFullsizeTex.at(3), mRWFullsizeTex.at(4)
-		, mRWFullsizeTex.at(5), mRWFullsizeTex.at(6));
-	clear(mRWFullsizeTex.at(1));
-	clear(mRWFullsizeTex.at(6));
-	amplitude(
-		mRWFullsizeTex.at(5), mRWFullsizeTex.at(6)
-		, mBurstCachedTex, mRWFullsizeTex.at(1));
+		mRWFullsizeTex.at(0), mPreFiltterdBurstTex);
+	burstFiltering(
+		mPreFiltterdBurstTex, mBurstCachedTex);
 
 	mBurstKernelRegenerate = false;
 
@@ -69,12 +60,12 @@ void PBLensFlare::generateGhost()
 
 	intensity(
 		mRWFullsizeTex.at(5), mRWFullsizeTex.at(6)
-		, mRWFullsizeTex.at(3), mRWFullsizeTex.at(4));
+		, mRWFullsizeTex.at(3));
 
-	multiply(mRWFullsizeTex.at(3), mRWFullsizeTex.at(7), mRWFullsizeTex.at(1));
-	oneElem(mRWFullsizeTex.at(1), mGhostCachedTex);
+	multiply(mRWFullsizeTex.at(3), mRWFullsizeTex.at(7), mGhostCachedTex);
+	//oneElem(mRWFullsizeTex.at(1), mGhostCachedTex);
 
-	mGhostKernelRegenerate = false;
+	//mGhostKernelRegenerate = false;
 
 	PIXEndEvent(mCommandList.Get());
 }
@@ -124,15 +115,13 @@ void PBLensFlare::raiseValue(DX12Buffer& InReal, DX12Buffer& InImage, DX12Buffer
 	PIXEndEvent(mCommandList.Get());
 }
 
-void PBLensFlare::lambdaIntegral(DX12Buffer& InReal, DX12Buffer& InImage, DX12Buffer& OutReal, DX12Buffer& OutImage)
+void PBLensFlare::lambdaIntegral(DX12Buffer& In, DX12Buffer& Out)
 {
 	PIXBeginEvent(mCommandList.Get(), 0, "lambdaIntegral");
 	setPipelineState(PipelineType_Compute, ShaderNameCompute_LambdaIntegral);
 	setPipelineConstantResource("computeConstants", mBurstCB[0]->GetGPUVirtualAddress());
-	setPipelineResource("realDistributionSource", InReal.getSRV(mCommandList));
-	setPipelineResource("imaginaryDistributionSource", InImage.getSRV(mCommandList));
-	setPipelineResource("realDistributionDestination", OutReal.getUAV(mCommandList));
-	setPipelineResource("imaginaryDistributionDestination", OutImage.getUAV(mCommandList));
+	setPipelineResource("sourceDistribution", In.getSRV(mCommandList));
+	setPipelineResource("realDistributionDestination", Out.getUAV(mCommandList));
 	dispatch(mTexwidth / mLensFlareComputeInformation.NUM_THREADS, mTexheight / mLensFlareComputeInformation.NUM_THREADS, 1);
 	PIXEndEvent(mCommandList.Get());
 }
@@ -171,7 +160,7 @@ void PBLensFlare::multiply(DX12Buffer& In1, DX12Buffer& In2, DX12Buffer& Out)
 	setPipelineResource("realDistributionSource", In1.getSRV(mCommandList));
 	setPipelineResource("imaginaryDistributionSource", In2.getSRV(mCommandList));
 	setPipelineResource("realDistributionDestination0", Out.getUAV(mCommandList));
-	dispatch(mTexwidth / mLensFlareComputeInformation.NUM_THREADS, mTexheight / mLensFlareComputeInformation.NUM_THREADS, 1);
+	dispatch(mGhostTexWidth / mLensFlareComputeInformation.NUM_THREADS, mGhostTexHeight / mLensFlareComputeInformation.NUM_THREADS, 1);
 	PIXEndEvent(mCommandList.Get());
 }
 
@@ -230,26 +219,24 @@ void PBLensFlare::polygon(DX12Buffer& Tex)
 
 
 
-void PBLensFlare::amplitude(DX12Buffer& InReal, DX12Buffer& InImage, DX12Buffer& OutReal, DX12Buffer& OutImage)
+void PBLensFlare::amplitude(DX12Buffer& InReal, DX12Buffer& InImage, DX12Buffer& Amp)
 {
 	PIXBeginEvent(mCommandList.Get(), 0, "ampCS");
 	setPipelineState(PipelineType_Compute, ShaderNameCompute_Amplitude);
 	setPipelineResource("realDistributionSource", InReal.getSRV(mCommandList));
 	setPipelineResource("imaginaryDistributionSource", InImage.getSRV(mCommandList));
-	setPipelineResource("realDistributionDestination", OutReal.getUAV(mCommandList));
-	setPipelineResource("imaginaryDistributionDestination", OutImage.getUAV(mCommandList));
+	setPipelineResource("destDestination", Amp.getUAV(mCommandList));
 	dispatch(mTexwidth / mLensFlareComputeInformation.NUM_THREADS, mTexheight / mLensFlareComputeInformation.NUM_THREADS, 1);
 	PIXEndEvent(mCommandList.Get());
 }
 
-void PBLensFlare::intensity(DX12Buffer& InReal, DX12Buffer& InImage, DX12Buffer& OutReal, DX12Buffer& OutImage)
+void PBLensFlare::intensity(DX12Buffer& InReal, DX12Buffer& InImage, DX12Buffer& Int)
 {
 	PIXBeginEvent(mCommandList.Get(), 0, "intenCS");
 	setPipelineState(PipelineType_Compute, ShaderNameCompute_Intensity);
 	setPipelineResource("realDistributionSource", InReal.getSRV(mCommandList));
 	setPipelineResource("imaginaryDistributionSource", InImage.getSRV(mCommandList));
-	setPipelineResource("realDistributionDestination", OutReal.getUAV(mCommandList));
-	setPipelineResource("imaginaryDistributionDestination", OutImage.getUAV(mCommandList));
+	setPipelineResource("destDestination", Int.getUAV(mCommandList));
 	dispatch(mTexwidth / mLensFlareComputeInformation.NUM_THREADS, mTexheight / mLensFlareComputeInformation.NUM_THREADS, 1);
 	PIXEndEvent(mCommandList.Get());
 }

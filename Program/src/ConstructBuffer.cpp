@@ -12,7 +12,7 @@ void PBLensFlare::setupWorkingTexture()
 	mRWfullsizeInnerTex.shrink_to_fit();
 	mRWdisplayTex.shrink_to_fit();
 
-	auto texDesc = CD3DX12_RESOURCE_DESC::Tex2D(DXGI_FORMAT_R16G16B16A16_FLOAT, mTexwidth, mTexheight);
+	auto texDesc = CD3DX12_RESOURCE_DESC::Tex2D(DXGI_FORMAT_R16_FLOAT, mTexwidth, mTexheight);
 	texDesc.Flags |= D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
@@ -26,6 +26,21 @@ void PBLensFlare::setupWorkingTexture()
 	uavDesc.Texture2D.MipSlice = 0;
 	uavDesc.Texture2D.PlaneSlice = 0;
 	uavDesc.Format = texDesc.Format;
+
+	auto texDescRGB = CD3DX12_RESOURCE_DESC::Tex2D(DXGI_FORMAT_R16G16B16A16_FLOAT, mTexwidth, mTexheight);
+	texDescRGB.Flags |= D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
+
+	D3D12_SHADER_RESOURCE_VIEW_DESC srvDescRGB{};
+	srvDescRGB.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+	srvDescRGB.Texture2D.MipLevels = 1;
+	srvDescRGB.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	srvDescRGB.Format = texDescRGB.Format;
+
+	D3D12_UNORDERED_ACCESS_VIEW_DESC uavDescRGB{};
+	uavDescRGB.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
+	uavDescRGB.Texture2D.MipSlice = 0;
+	uavDescRGB.Texture2D.PlaneSlice = 0;
+	uavDescRGB.Format = texDescRGB.Format;
 
 	DX12Buffer tex;
 	for (s32 i = 0; i < RWtexNum; i++)
@@ -56,7 +71,7 @@ void PBLensFlare::setupWorkingTexture()
 		swprintf(name, 30, L"mRWdisplayTex[%d]", i);
 		tex.createRegularBuffer(
 			mHeap, mDevice, mCommandList,
-			texDesc, srvDesc, uavDesc,
+			texDescRGB, srvDescRGB, uavDescRGB,
 			D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, name);
 		mRWdisplayTex.push_back(tex);
 	}
@@ -65,9 +80,18 @@ void PBLensFlare::setupWorkingTexture()
 		wchar_t name[30] = L"mRWBurstCachedTex";
 		tex.createRegularBuffer(
 			mHeap, mDevice, mCommandList,
-			texDesc, srvDesc, uavDesc,
+			texDescRGB, srvDescRGB, uavDescRGB,
 			D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, name);
 		mBurstCachedTex = tex;
+	}
+
+	{
+		wchar_t name[30] = L"mPreFiltterdBurstTex";
+		tex.createRegularBuffer(
+			mHeap, mDevice, mCommandList,
+			texDescRGB, srvDescRGB, uavDescRGB,
+			D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, name);
+		mPreFiltterdBurstTex = tex;
 	}
 
 	auto texDescOneElem = CD3DX12_RESOURCE_DESC::Tex2D(DXGI_FORMAT_R8_UNORM, mGhostTexWidth, mGhostTexHeight);

@@ -9,8 +9,9 @@ struct CBuffer
 
 ConstantBuffer<CBuffer> computeConstants : register(b0);
 
-Texture2D<float4> realDistributionSource : register(t0);
-Texture2D<float4> imaginaryDistributionSource : register(t1);
+Texture2D<float> sourceDistribution : register(t0);
+Texture2D<float4> realDistributionSource : register(t1);
+Texture2D<float4> imaginaryDistributionSource : register(t2);
 
 RWTexture2D<float4> realDistributionDestination : register(u0);
 RWTexture2D<float4> imaginaryDistributionDestination : register(u1);
@@ -75,13 +76,12 @@ void lambdaIntegral(uint3 dispatchThreadID : SV_DispatchThreadID)
         float cr = 1 / lambda;
         cr *= cr;
         
-        result += (cr * realDistributionSource.SampleLevel(imageSampler, scaled_uv, 0).r * !clamped * lerp(1.f, lambda2RGB(lambda), 0.75f));
+        result += (cr * sourceDistribution.SampleLevel(imageSampler, scaled_uv, 0) * !clamped * lerp(1.f, lambda2RGB(lambda), 0.75f));
     }
 
     result /= (float) num_steps;
 
     realDistributionDestination[ID] = float4(result, 1.0);
-    imaginaryDistributionDestination[ID] = float4(result, 1.0);
 }
 
 float2 Rotate(float2 p, float a)
@@ -125,5 +125,5 @@ void burstFilter(uint3 dispatchThreadID : SV_DispatchThreadID)
 
     result /= (float) num_steps;
 
-    realDistributionDestination[ID] = float4(result, 1.0);
+    realDistributionDestination[ID] = float4(result * computeConstants.glareIntensity, 1.0);
 }

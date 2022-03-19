@@ -1,8 +1,8 @@
-﻿Texture2D<float4> realDistributionSource : register(t0);
-Texture2D<float4> imaginaryDistributionSource : register(t1);
+﻿Texture2D<float> realDistributionSource : register(t0);
+Texture2D<float> imaginaryDistributionSource : register(t1);
 
-RWTexture2D<float4> realDistributionDestination : register(u0);
-RWTexture2D<float4> imaginaryDistributionDestination : register(u1);
+RWTexture2D<float> realDistributionDestination : register(u0);
+RWTexture2D<float> imaginaryDistributionDestination : register(u1);
 
 SamplerState imageSampler : register(s0);
 
@@ -29,9 +29,7 @@ void swap(uint3 dispatchThreadID : SV_DispatchThreadID)
     }
 
     float2 ID = float2(i, j);
-
-    float3 colorR = realDistributionSource[ID].xyz;
-    realDistributionDestination[dispatchThreadID.xy] = float4(colorR, 1);
-    float3 colorI = imaginaryDistributionSource[ID].xyz;
-    imaginaryDistributionDestination[dispatchThreadID.xy] = float4(colorI, 1);
+    
+    realDistributionDestination[dispatchThreadID.xy] = realDistributionSource[ID];
+    imaginaryDistributionDestination[dispatchThreadID.xy] = imaginaryDistributionSource[ID];
 }

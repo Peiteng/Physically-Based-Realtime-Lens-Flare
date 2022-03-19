@@ -1,8 +1,8 @@
-﻿Texture2D<float4> realDistributionSource : register(t0);
-Texture2D<float4> imaginaryDistributionSource : register(t1);
+﻿Texture2D<float> realDistributionSource : register(t0);
+Texture2D<float> imaginaryDistributionSource : register(t1);
 
-RWTexture2D<float4> realDistributionDestination : register(u0);
-RWTexture2D<float4> imaginaryDistributionDestination : register(u1);
+RWTexture2D<float> realDistributionDestination : register(u0);
+RWTexture2D<float> imaginaryDistributionDestination : register(u1);
 
 SamplerState imageSampler : register(s0);
 
@@ -29,25 +29,25 @@ void computeTwiddleFactor(uint passIndex, uint x, out float2 weights)
 #define IMAGE 1
 
 #ifdef DOUBLE
-groupshared float3 ButterflyArray[2][2][LENGTH];
+groupshared float ButterflyArray[2][2][LENGTH];
 #define SharedArray(tmpID, x, realImage) (ButterflyArray[(tmpID)][(realImage)][(x)])
 #else
-groupshared float3 ButterflyArray[2][LENGTH];
+groupshared float ButterflyArray[2][LENGTH];
 #define SharedArray(tmpID, x, realImage) (ButterflyArray[(realImage)][(x)])
 #endif
 
-void twiddleWeighting(uint passIndex, uint x, uint tmp, out float3 resultR, out float3 resultI)
+void twiddleWeighting(uint passIndex, uint x, uint tmp, out float resultR, out float resultI)
 {
     uint2 srcIndices;
     float2 Weights;
     
     computeSrcID(passIndex, x, srcIndices);
     
-    float3 inputR1 = SharedArray(tmp, srcIndices.x, REAL);
-    float3 inputI1 = SharedArray(tmp, srcIndices.x, IMAGE);
+    float inputR1 = SharedArray(tmp, srcIndices.x, REAL);
+    float inputI1 = SharedArray(tmp, srcIndices.x, IMAGE);
 
-    float3 inputR2 = SharedArray(tmp, srcIndices.y, REAL);
-    float3 inputI2 = SharedArray(tmp, srcIndices.y, IMAGE);
+    float inputR2 = SharedArray(tmp, srcIndices.y, REAL);
+    float inputI2 = SharedArray(tmp, srcIndices.y, IMAGE);
     
     computeTwiddleFactor(passIndex, x, Weights);
     
@@ -67,16 +67,16 @@ void twiddleWeighting(uint passIndex, uint x, uint tmp, out float3 resultR, out 
 void prepareButterfly(uint bufferID, inout uint2 texPos)
 {
     texPos = (texPos + LENGTH / 2) % LENGTH; //centering spectrum
-    SharedArray(0, bufferID, REAL) = realDistributionSource[texPos].rgb;
+    SharedArray(0, bufferID, REAL) = realDistributionSource[texPos];
 
 #if ROW && !INVERSE
-	SharedArray(0, bufferID, IMAGE) = (0.0).xxx;
+	SharedArray(0, bufferID, IMAGE) = 0;
 #else
-    SharedArray(0, bufferID, IMAGE) = imaginaryDistributionSource[texPos].rgb;
+    SharedArray(0, bufferID, IMAGE) = imaginaryDistributionSource[texPos];
 #endif
 }
 
-void executeButterfly(in uint bufferID, out float3 real, out float3 image)
+void executeButterfly(in uint bufferID, out float real, out float image)
 {
     for (int butterFlyID = 0; butterFlyID < BUTTERFLY_COUNT - 1; ++butterFlyID)
     {
@@ -101,10 +101,10 @@ void FFT1D(uint3 dispatchThreadID : SV_DispatchThreadID)
     uint2 texPos = dispatchThreadID.yx;
 #endif
 
-    float3 r = 0, i = 0;
+    float r = 0, i = 0;
     prepareButterfly(bufferID, texPos);
     executeButterfly(bufferID, r, i);
     
-    realDistributionDestination[texPos].rgb = r;
-    imaginaryDistributionDestination[texPos].rgb = i;
+    realDistributionDestination[texPos] = r;
+    imaginaryDistributionDestination[texPos] = i;
 }

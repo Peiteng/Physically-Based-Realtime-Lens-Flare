@@ -171,15 +171,17 @@ void PBLensFlare::setupComputePipeline()
 		mShaderSettingComputeTbl[setting].shaderMacro.push_back(Shader::DefineMacro{ L"LAMBDA_NM_RED", to_wstring(mLensFlareComputeInformation.LAMBDA_NM_RED) });
 		mShaderSettingComputeTbl[setting].shaderMacro.push_back(Shader::DefineMacro{ L"LAMBDA_NM_BLUE", to_wstring(mLensFlareComputeInformation.LAMBDA_NM_BLUE) });
 		mShaderSettingComputeTbl[setting].descriptorKeys.push_back("computeConstants");
+		mShaderSettingComputeTbl[setting].descriptorKeys.push_back("sourceDistribution");
 		mShaderSettingComputeTbl[setting].descriptorKeys.push_back("realDistributionSource");
 		mShaderSettingComputeTbl[setting].descriptorKeys.push_back("imaginaryDistributionSource");
 		mShaderSettingComputeTbl[setting].descriptorKeys.push_back("realDistributionDestination");
 		mShaderSettingComputeTbl[setting].descriptorKeys.push_back("imaginaryDistributionDestination");
 		mShaderSettingComputeTbl[setting].descriptors["computeConstants"] = DescriptorInfo{ 0 , D3D12_DESCRIPTOR_RANGE{ D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0} };
-		mShaderSettingComputeTbl[setting].descriptors["realDistributionSource"] = DescriptorInfo{ 1, D3D12_DESCRIPTOR_RANGE{ D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0} };
-		mShaderSettingComputeTbl[setting].descriptors["imaginaryDistributionSource"] = DescriptorInfo{ 2, D3D12_DESCRIPTOR_RANGE{ D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 1} };
-		mShaderSettingComputeTbl[setting].descriptors["realDistributionDestination"] = DescriptorInfo{ 3, D3D12_DESCRIPTOR_RANGE{ D3D12_DESCRIPTOR_RANGE_TYPE_UAV, 1, 0} };
-		mShaderSettingComputeTbl[setting].descriptors["imaginaryDistributionDestination"] = DescriptorInfo{ 4, D3D12_DESCRIPTOR_RANGE{ D3D12_DESCRIPTOR_RANGE_TYPE_UAV, 1, 1} };
+		mShaderSettingComputeTbl[setting].descriptors["sourceDistribution"] = DescriptorInfo{ 1, D3D12_DESCRIPTOR_RANGE{ D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0} };
+		mShaderSettingComputeTbl[setting].descriptors["realDistributionSource"] = DescriptorInfo{ 2, D3D12_DESCRIPTOR_RANGE{ D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 1} };
+		mShaderSettingComputeTbl[setting].descriptors["imaginaryDistributionSource"] = DescriptorInfo{ 3, D3D12_DESCRIPTOR_RANGE{ D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 2} };
+		mShaderSettingComputeTbl[setting].descriptors["realDistributionDestination"] = DescriptorInfo{ 4, D3D12_DESCRIPTOR_RANGE{ D3D12_DESCRIPTOR_RANGE_TYPE_UAV, 1, 0} };
+		mShaderSettingComputeTbl[setting].descriptors["imaginaryDistributionDestination"] = DescriptorInfo{ 5, D3D12_DESCRIPTOR_RANGE{ D3D12_DESCRIPTOR_RANGE_TYPE_UAV, 1, 1} };
 		setting = ShaderNameCompute_LambdaIntegral;
 		mShaderSettingComputeTbl[setting].shaderFileName = L"simulateLensFlareGenerateBurst.hlsl";
 		mShaderSettingComputeTbl[setting].shaderEntryPoint = L"lambdaIntegral";
@@ -191,15 +193,17 @@ void PBLensFlare::setupComputePipeline()
 		mShaderSettingComputeTbl[setting].shaderMacro.push_back(Shader::DefineMacro{ L"LAMBDA_NM_RED", to_wstring(mLensFlareComputeInformation.LAMBDA_NM_RED) });
 		mShaderSettingComputeTbl[setting].shaderMacro.push_back(Shader::DefineMacro{ L"LAMBDA_NM_BLUE", to_wstring(mLensFlareComputeInformation.LAMBDA_NM_BLUE) });
 		mShaderSettingComputeTbl[setting].descriptorKeys.push_back("computeConstants");
+		mShaderSettingComputeTbl[setting].descriptorKeys.push_back("sourceDistribution");
 		mShaderSettingComputeTbl[setting].descriptorKeys.push_back("realDistributionSource");
 		mShaderSettingComputeTbl[setting].descriptorKeys.push_back("imaginaryDistributionSource");
 		mShaderSettingComputeTbl[setting].descriptorKeys.push_back("realDistributionDestination");
 		mShaderSettingComputeTbl[setting].descriptorKeys.push_back("imaginaryDistributionDestination");
 		mShaderSettingComputeTbl[setting].descriptors["computeConstants"] = DescriptorInfo{ 0 , D3D12_DESCRIPTOR_RANGE{ D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0} };
-		mShaderSettingComputeTbl[setting].descriptors["realDistributionSource"] = DescriptorInfo{ 1, D3D12_DESCRIPTOR_RANGE{ D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0} };
-		mShaderSettingComputeTbl[setting].descriptors["imaginaryDistributionSource"] = DescriptorInfo{ 2, D3D12_DESCRIPTOR_RANGE{ D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 1} };
-		mShaderSettingComputeTbl[setting].descriptors["realDistributionDestination"] = DescriptorInfo{ 3, D3D12_DESCRIPTOR_RANGE{ D3D12_DESCRIPTOR_RANGE_TYPE_UAV, 1, 0} };
-		mShaderSettingComputeTbl[setting].descriptors["imaginaryDistributionDestination"] = DescriptorInfo{ 4, D3D12_DESCRIPTOR_RANGE{ D3D12_DESCRIPTOR_RANGE_TYPE_UAV, 1, 1} };
+		mShaderSettingComputeTbl[setting].descriptors["sourceDistribution"] = DescriptorInfo{ 1, D3D12_DESCRIPTOR_RANGE{ D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0} };
+		mShaderSettingComputeTbl[setting].descriptors["realDistributionSource"] = DescriptorInfo{ 2, D3D12_DESCRIPTOR_RANGE{ D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 1} };
+		mShaderSettingComputeTbl[setting].descriptors["imaginaryDistributionSource"] = DescriptorInfo{ 3, D3D12_DESCRIPTOR_RANGE{ D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 2} };
+		mShaderSettingComputeTbl[setting].descriptors["realDistributionDestination"] = DescriptorInfo{ 4, D3D12_DESCRIPTOR_RANGE{ D3D12_DESCRIPTOR_RANGE_TYPE_UAV, 1, 0} };
+		mShaderSettingComputeTbl[setting].descriptors["imaginaryDistributionDestination"] = DescriptorInfo{ 5, D3D12_DESCRIPTOR_RANGE{ D3D12_DESCRIPTOR_RANGE_TYPE_UAV, 1, 1} };
 		setting = ShaderNameCompute_BurstFilter;
 		mShaderSettingComputeTbl[setting].shaderFileName = L"simulateLensFlareGenerateBurst.hlsl";
 		mShaderSettingComputeTbl[setting].shaderEntryPoint = L"burstFilter";
@@ -211,15 +215,17 @@ void PBLensFlare::setupComputePipeline()
 		mShaderSettingComputeTbl[setting].shaderMacro.push_back(Shader::DefineMacro{ L"LAMBDA_NM_RED", to_wstring(mLensFlareComputeInformation.LAMBDA_NM_RED) });
 		mShaderSettingComputeTbl[setting].shaderMacro.push_back(Shader::DefineMacro{ L"LAMBDA_NM_BLUE", to_wstring(mLensFlareComputeInformation.LAMBDA_NM_BLUE) });
 		mShaderSettingComputeTbl[setting].descriptorKeys.push_back("computeConstants");
+		mShaderSettingComputeTbl[setting].descriptorKeys.push_back("sourceDistribution");
 		mShaderSettingComputeTbl[setting].descriptorKeys.push_back("realDistributionSource");
 		mShaderSettingComputeTbl[setting].descriptorKeys.push_back("imaginaryDistributionSource");
 		mShaderSettingComputeTbl[setting].descriptorKeys.push_back("realDistributionDestination");
 		mShaderSettingComputeTbl[setting].descriptorKeys.push_back("imaginaryDistributionDestination");
 		mShaderSettingComputeTbl[setting].descriptors["computeConstants"] = DescriptorInfo{ 0 , D3D12_DESCRIPTOR_RANGE{ D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0} };
-		mShaderSettingComputeTbl[setting].descriptors["realDistributionSource"] = DescriptorInfo{ 1, D3D12_DESCRIPTOR_RANGE{ D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0} };
-		mShaderSettingComputeTbl[setting].descriptors["imaginaryDistributionSource"] = DescriptorInfo{ 2, D3D12_DESCRIPTOR_RANGE{ D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 1} };
-		mShaderSettingComputeTbl[setting].descriptors["realDistributionDestination"] = DescriptorInfo{ 3, D3D12_DESCRIPTOR_RANGE{ D3D12_DESCRIPTOR_RANGE_TYPE_UAV, 1, 0} };
-		mShaderSettingComputeTbl[setting].descriptors["imaginaryDistributionDestination"] = DescriptorInfo{ 4, D3D12_DESCRIPTOR_RANGE{ D3D12_DESCRIPTOR_RANGE_TYPE_UAV, 1, 1} };
+		mShaderSettingComputeTbl[setting].descriptors["sourceDistribution"] = DescriptorInfo{ 1, D3D12_DESCRIPTOR_RANGE{ D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0} };
+		mShaderSettingComputeTbl[setting].descriptors["realDistributionSource"] = DescriptorInfo{ 2, D3D12_DESCRIPTOR_RANGE{ D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 1} };
+		mShaderSettingComputeTbl[setting].descriptors["imaginaryDistributionSource"] = DescriptorInfo{ 3, D3D12_DESCRIPTOR_RANGE{ D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 2} };
+		mShaderSettingComputeTbl[setting].descriptors["realDistributionDestination"] = DescriptorInfo{ 4, D3D12_DESCRIPTOR_RANGE{ D3D12_DESCRIPTOR_RANGE_TYPE_UAV, 1, 0} };
+		mShaderSettingComputeTbl[setting].descriptors["imaginaryDistributionDestination"] = DescriptorInfo{ 5, D3D12_DESCRIPTOR_RANGE{ D3D12_DESCRIPTOR_RANGE_TYPE_UAV, 1, 1} };
 	}
 
 	{
@@ -365,12 +371,10 @@ void PBLensFlare::setupComputePipeline()
 		mShaderSettingComputeTbl[setting].shaderMacro.push_back(Shader::DefineMacro{ L"NUM_THREADS", to_wstring(mLensFlareComputeInformation.NUM_THREADS) });
 		mShaderSettingComputeTbl[setting].descriptorKeys.push_back("realDistributionSource");
 		mShaderSettingComputeTbl[setting].descriptorKeys.push_back("imaginaryDistributionSource");
-		mShaderSettingComputeTbl[setting].descriptorKeys.push_back("realDistributionDestination");
-		mShaderSettingComputeTbl[setting].descriptorKeys.push_back("imaginaryDistributionDestination");
+		mShaderSettingComputeTbl[setting].descriptorKeys.push_back("destDestination");
 		mShaderSettingComputeTbl[setting].descriptors["realDistributionSource"] = DescriptorInfo{ 0, D3D12_DESCRIPTOR_RANGE{ D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0} };
 		mShaderSettingComputeTbl[setting].descriptors["imaginaryDistributionSource"] = DescriptorInfo{ 1, D3D12_DESCRIPTOR_RANGE{ D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 1} };
-		mShaderSettingComputeTbl[setting].descriptors["realDistributionDestination"] = DescriptorInfo{ 2, D3D12_DESCRIPTOR_RANGE{ D3D12_DESCRIPTOR_RANGE_TYPE_UAV, 1, 0} };
-		mShaderSettingComputeTbl[setting].descriptors["imaginaryDistributionDestination"] = DescriptorInfo{ 3, D3D12_DESCRIPTOR_RANGE{ D3D12_DESCRIPTOR_RANGE_TYPE_UAV, 1, 1} };
+		mShaderSettingComputeTbl[setting].descriptors["destDestination"] = DescriptorInfo{ 2, D3D12_DESCRIPTOR_RANGE{ D3D12_DESCRIPTOR_RANGE_TYPE_UAV, 1, 0} };
 		setting = ShaderNameCompute_Intensity;
 		mShaderSettingComputeTbl[setting].shaderFileName = L"simulateLensFlareComplexDistribution.hlsl";
 		mShaderSettingComputeTbl[setting].shaderEntryPoint = L"intensity";
@@ -378,12 +382,10 @@ void PBLensFlare::setupComputePipeline()
 		mShaderSettingComputeTbl[setting].shaderMacro.push_back(Shader::DefineMacro{ L"NUM_THREADS", to_wstring(mLensFlareComputeInformation.NUM_THREADS) });
 		mShaderSettingComputeTbl[setting].descriptorKeys.push_back("realDistributionSource");
 		mShaderSettingComputeTbl[setting].descriptorKeys.push_back("imaginaryDistributionSource");
-		mShaderSettingComputeTbl[setting].descriptorKeys.push_back("realDistributionDestination");
-		mShaderSettingComputeTbl[setting].descriptorKeys.push_back("imaginaryDistributionDestination");
+		mShaderSettingComputeTbl[setting].descriptorKeys.push_back("destDestination");
 		mShaderSettingComputeTbl[setting].descriptors["realDistributionSource"] = DescriptorInfo{ 0, D3D12_DESCRIPTOR_RANGE{ D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0} };
 		mShaderSettingComputeTbl[setting].descriptors["imaginaryDistributionSource"] = DescriptorInfo{ 1, D3D12_DESCRIPTOR_RANGE{ D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 1} };
-		mShaderSettingComputeTbl[setting].descriptors["realDistributionDestination"] = DescriptorInfo{ 2, D3D12_DESCRIPTOR_RANGE{ D3D12_DESCRIPTOR_RANGE_TYPE_UAV, 1, 0} };
-		mShaderSettingComputeTbl[setting].descriptors["imaginaryDistributionDestination"] = DescriptorInfo{ 3, D3D12_DESCRIPTOR_RANGE{ D3D12_DESCRIPTOR_RANGE_TYPE_UAV, 1, 1} };
+		mShaderSettingComputeTbl[setting].descriptors["destDestination"] = DescriptorInfo{ 2, D3D12_DESCRIPTOR_RANGE{ D3D12_DESCRIPTOR_RANGE_TYPE_UAV, 1, 0} };
 	}
 
 	{

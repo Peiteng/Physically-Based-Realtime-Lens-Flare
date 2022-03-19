@@ -150,11 +150,9 @@ private:
 
 	struct FRFCB
 	{
-		vec3 lambda = vec3(633e-9, 532e-9, 466e-9);
+		f32 lambda = 633e-9;
 		f32 distance;
-
 		FLOAT2 interval;
-		FLOAT2 padding;
 	};
 
 	struct BurstCB
@@ -472,6 +470,7 @@ private:
 	//Texture Resource
 	std::vector<TextureData> mFullsizeTex;
 	std::vector<DX12Buffer> mRWFullsizeTex;
+	DX12Buffer mPreFiltterdBurstTex;
 	std::vector<DX12Buffer> mRWdisplayTex;
 	std::vector<DX12Buffer> mRWfullsizeInnerTex;
 
@@ -492,7 +491,7 @@ private:
 	void drawFRF(DX12Buffer& Real, DX12Buffer& Image);
 	void FFT2D(DX12Buffer& Real, DX12Buffer& Image, const bool inverse = false);
 	void raiseValue(DX12Buffer& InReal, DX12Buffer& InImage, DX12Buffer& OutReal, DX12Buffer& OutImage);
-	void lambdaIntegral(DX12Buffer& InReal, DX12Buffer& InImage, DX12Buffer& OutReal, DX12Buffer& OutImage);
+	void lambdaIntegral(DX12Buffer& In, DX12Buffer& Out);
 	void burstFiltering(DX12Buffer& In, DX12Buffer& Out);
 	void multiply(DX12Buffer& In1, DX12Buffer& In2, DX12Buffer& Out);
 	void complexMultiply(DX12Buffer& InReal0, DX12Buffer& InImage0, DX12Buffer& InReal1, DX12Buffer& InImage1, DX12Buffer& OutReal, DX12Buffer& OutImage);
@@ -501,8 +500,8 @@ private:
 	void copy(DX12Buffer& In, DX12Buffer& Out);
 	void clear(DX12Buffer& Tex);
 	void polygon(DX12Buffer& Tex);
-	void amplitude(DX12Buffer& InReal, DX12Buffer& InImage, DX12Buffer& OutReal, DX12Buffer& OutImage);
-	void intensity(DX12Buffer& InReal, DX12Buffer& InImage, DX12Buffer& OutReal, DX12Buffer& OutImage);
+	void amplitude(DX12Buffer& InReal, DX12Buffer& InImage, DX12Buffer& Amp);
+	void intensity(DX12Buffer& InReal, DX12Buffer& InImage, DX12Buffer& Int);
 	void traceRay();
 	void addGhosts(bool wireFrame = false);
 	void addGhostsUV();
