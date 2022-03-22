@@ -134,18 +134,18 @@ private:
 		vec3 lightDir;
 		f32 apertureRadius = 5.0f;
 
-		FLOAT2 backbufferSize;
-		FLOAT2 padding;
-
+		f32 aspect;
 		FLOAT3 color;
 	};
 
 	struct drawingCB
 	{
 		f32 ghostScale = 0.02;
-		FLOAT2 backbufferSize;
-		f32 intensity;
 		FLOAT3 color;
+
+		f32 aspect;
+		f32 intensity;
+		FLOAT2 padding;
 	};
 
 	struct FRFCB

@@ -3,9 +3,7 @@
     float3 lightDir;
     float apertureRadius;
     
-    float2 backbufferSize;
-    float2 padding;
-    
+    float aspect;
     float3 color;
 };
 
@@ -24,8 +22,6 @@ struct StarbustInput
 StarbustInput starburstVS(uint id : SV_VertexID)
 {
     StarbustInput result;
-
-    float aspect = computeConstants.backbufferSize.x / computeConstants.backbufferSize.y;
     
     const float2 vertex = float2(id / 2u, id % 2u);
     StarbustInput Out = (StarbustInput) 0;
@@ -35,7 +31,7 @@ StarbustInput starburstVS(uint id : SV_VertexID)
     
     Out.pos.xy += -computeConstants.lightDir.xy * 10;
     Out.pos.xy *= computeConstants.apertureRadius * 0.1;
-    Out.pos.xy *= float2(1.f, aspect);
+    Out.pos.xy *= float2(1.f, computeConstants.aspect);
     Out.uv.z = 1.f - 2 * lerp(0, 1, length(computeConstants.lightDir.xy));
     
     return Out;

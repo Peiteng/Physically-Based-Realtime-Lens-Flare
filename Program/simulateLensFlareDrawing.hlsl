@@ -9,9 +9,11 @@ struct PSInput
 struct CBuffer
 {
     float ghostScale;
-    float2 backbufferSize;
-    float intensity;
     float3 color;
+    
+    float aspect;
+    float intensity;
+    float2 padding;
 };
 
 ConstantBuffer<CBuffer> computeConstants : register(b0);
@@ -67,7 +69,7 @@ PSInput rayTraceVS(uint vertexID : SV_VertexID, uint instanceID : SV_InstanceID)
 {
     // (GRID_DIV  * GRID_DIV) vertices per Ghost
     PSInput vertex = traceResult[vertexID + instanceID * GRID_DIV * GRID_DIV];
-    vertex.pos.xy *= float2(1.f, computeConstants.backbufferSize.x / computeConstants.backbufferSize.y) * computeConstants.ghostScale;
+    vertex.pos.xy *= float2(1.f, computeConstants.aspect) * computeConstants.ghostScale;
     
     return vertex;
 }

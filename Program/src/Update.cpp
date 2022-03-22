@@ -19,12 +19,12 @@ void PBLensFlare::updateBuffer()
 
 	drawBurstCB drawBurstCB;
 	drawBurstCB.lightDir = lightDir;
-	drawBurstCB.backbufferSize = backBufferSize;
+	drawBurstCB.aspect = backBufferSize.x / backBufferSize.y;
 	drawBurstCB.apertureRadius = (100 - mApertureRadius * mApertureRadius + 0.1) * 0.05;
 	drawBurstCB.color = mColor;
 
 	drawingCB drawingCB;
-	drawingCB.backbufferSize = backBufferSize;
+	drawingCB.aspect = backBufferSize.x / backBufferSize.y;
 	drawingCB.ghostScale = mGhostScale;
 	drawingCB.intensity = mIntensity * mGhostIntensityRatio;
 	drawingCB.color = mColor;
