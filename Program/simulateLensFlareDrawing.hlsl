@@ -2,8 +2,8 @@ struct PSInput
 {
     float4 pos : SV_POSITION;
     float4 drawInfo : TEXCOORD0;
-    float4 coordinates[SAMPLE_LAMBDA_NUM] : WORLD;
-    float4 color[SAMPLE_LAMBDA_NUM] : VIEW;
+    float4 coordinates[SAMPLE_LAMBDA_NUM] : RAYPOS;
+    float4 color[SAMPLE_LAMBDA_NUM] : RAYCOLOR;
 };
 
 struct CBuffer

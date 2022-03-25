@@ -134,7 +134,7 @@ void PBLensFlare::constructConstantBufferForLensFlare()
 	mLensBank = createConstantBuffers(CD3DX12_RESOURCE_DESC::Buffer(
 		sizeof(Lens) * LENS_NAME_MAX
 	));
-	writeToUploadHeapMemory(mLensBank[0].Get(), sizeof(Lens) * LENS_NAME_MAX, LENS_TABLE);
+	updateBuffer(mLensBank[0].Get(), sizeof(Lens) * LENS_NAME_MAX, LENS_TABLE);
 
 	mTracingCB = createConstantBuffers(CD3DX12_RESOURCE_DESC::Buffer(
 		sizeof(tracingCB)
@@ -383,8 +383,8 @@ void PBLensFlare::constructQuad()
 	using VertexData = std::vector<Vertex>;
 	using IndexData = std::vector<UINT>;
 
-	f32 w = mWidth;
-	f32 h = mHeight;
+	f32 w = mScreenSize.w;
+	f32 h = mScreenSize.h;
 
 	VertexData quadVertices = {
 	  { DirectX::XMFLOAT3(-w + 0,  h, 0.0f), DirectX::XMFLOAT2(0.0f, 0.0f) },
@@ -397,10 +397,10 @@ void PBLensFlare::constructQuad()
 
 void PBLensFlare::constructBackBuffer()
 {
-	s32 backBufferWidth = mWidth;
-	s32 backBufferHeight = mHeight;
+	s32 backBufferWidth = mScreenSize.w;
+	s32 backBufferHeight = mScreenSize.h;
 
-	auto bufferDesc = CD3DX12_RESOURCE_DESC::Tex2D(DXGI_FORMAT_R16G16B16A16_UNORM, mWidth, mHeight);
+	auto bufferDesc = CD3DX12_RESOURCE_DESC::Tex2D(DXGI_FORMAT_R16G16B16A16_UNORM, mScreenSize.w, mScreenSize.h);
 	bufferDesc.Flags |= D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};

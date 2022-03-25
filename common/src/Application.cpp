@@ -88,8 +88,8 @@ void Application::initializeApp(HWND hwnd, DXGI_FORMAT format, bool isFullscreen
 	//determine client region size fro HWND
 	RECT rect;
 	GetClientRect(hwnd, &rect);
-	mWidth = rect.right - rect.left;
-	mHeight = rect.bottom - rect.top;
+	mScreenSize.w = rect.right - rect.left;
+	mScreenSize.h = rect.bottom - rect.top;
 
 	bool useHDR = format == DXGI_FORMAT_R16G16B16A16_FLOAT || format == DXGI_FORMAT_R10G10B10A2_UNORM;
 	if (useHDR)
@@ -127,8 +127,8 @@ void Application::initializeApp(HWND hwnd, DXGI_FORMAT format, bool isFullscreen
 	{
 		DXGI_SWAP_CHAIN_DESC1 scDesc{};
 		scDesc.BufferCount = FrameBufferCount;
-		scDesc.Width = mWidth;
-		scDesc.Height = mHeight;
+		scDesc.Width = mScreenSize.w;
+		scDesc.Height = mScreenSize.h;
 		scDesc.Format = format;
 		scDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 		// scDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
@@ -159,7 +159,7 @@ void Application::initializeApp(HWND hwnd, DXGI_FORMAT format, bool isFullscreen
 	factory->MakeWindowAssociation(hwnd, DXGI_MWA_NO_ALT_ENTER);
 	mSurfaceFormat = mSwapchain->getFormat();
 
-	createDefaultDepthBuffer(mWidth, mHeight);
+	createDefaultDepthBuffer(mScreenSize.w, mScreenSize.h);
 
 	createCommandAllocators();
 
@@ -173,8 +173,8 @@ void Application::initializeApp(HWND hwnd, DXGI_FORMAT format, bool isFullscreen
 	ThrowIfFailed(hr, "CreateCommandList 失敗");
 	mCommandList->Close();
 
-	mViewport = CD3DX12_VIEWPORT(0.0f, 0.0f, float(mWidth), float(mHeight));
-	mScissorRect = CD3DX12_RECT(0, 0, LONG(mWidth), LONG(mHeight));
+	mViewport = CD3DX12_VIEWPORT(0.0f, 0.0f, mScreenSize.w, mScreenSize.h);
+	mScissorRect = CD3DX12_RECT(0, 0, mScreenSize.w, mScreenSize.h);
 
 	prepare();
 
@@ -314,7 +314,7 @@ ComPtr<ID3D12GraphicsCommandList> Application::createBundleCommandList()
 	return command;
 }
 
-void Application::writeToUploadHeapMemory(ID3D12Resource1* resource, uint32_t size, const void* data)
+void Application::updateBuffer(ID3D12Resource1* resource, uint32_t size, const void* data)
 {
 	void* mapped;
 	HRESULT hr = resource->Map(0, nullptr, &mapped);
@@ -452,8 +452,8 @@ void Application::waitForIdleGPU()
 }
 void Application::onSizeChanged(UINT width, UINT height, bool isMinimized)
 {
-	mWidth = width;
-	mHeight = height;
+	mScreenSize.w = width;
+	mScreenSize.h = height;
 	if (!mSwapchain || isMinimized)
 		return;
 
@@ -462,14 +462,14 @@ void Application::onSizeChanged(UINT width, UINT height, bool isMinimized)
 
 	mDepthBuffer.Reset();
 	mHeapDSV->free(mDefaultDepthDSV);
-	createDefaultDepthBuffer(mWidth, mHeight);
+	createDefaultDepthBuffer(mScreenSize.w, mScreenSize.h);
 
 	mFrameIndex = mSwapchain->getCurrentBackBufferIndex();
 
-	mViewport.Width = float(mWidth);
-	mViewport.Height = float(mHeight);
-	mScissorRect.right = mWidth;
-	mScissorRect.bottom = mHeight;
+	mViewport.Width = mScreenSize.w;
+	mViewport.Height = mScreenSize.h;
+	mScissorRect.right = mScreenSize.w;
+	mScissorRect.bottom = mScreenSize.h;
 }
 void Application::toggleFullscreen()
 {
@@ -485,8 +485,8 @@ void Application::toggleFullscreen()
 		// Windowed -> FullScreen
 		DXGI_MODE_DESC desc;
 		desc.Format = mSurfaceFormat;
-		desc.Width = mWidth;
-		desc.Height = mHeight;
+		desc.Width = mScreenSize.w;
+		desc.Height = mScreenSize.h;
 		desc.RefreshRate.Denominator = 1;
 		desc.RefreshRate.Numerator = 60;
 		desc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
@@ -494,7 +494,7 @@ void Application::toggleFullscreen()
 		mSwapchain->resizeTarget(&desc);
 		mSwapchain->setFullScreen(true);
 	}
-	onSizeChanged(mWidth, mHeight, false);
+	onSizeChanged(mScreenSize.w, mScreenSize.h, false);
 }
 
 void Application::prepareImGui()
@@ -735,7 +735,7 @@ void Application::initBufferByResource(DX12Buffer& targetBuffer, const u32 buffe
 
 	auto desc = CD3DX12_RESOURCE_DESC::Buffer(bufferSize);
 	auto upload = createResource(desc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, D3D12_HEAP_TYPE_UPLOAD);
-	writeToUploadHeapMemory(upload.Get(), bufferSize, initResource);
+	updateBuffer(upload.Get(), bufferSize, initResource);
 
 	command->CopyResource(targetBuffer.getBuffer().Get(), upload.Get());
 
@@ -748,7 +748,7 @@ void Application::createIndexBuffer(Buffer& indexBuffer, const u32 bufferSize, c
 	auto indexDesc = CD3DX12_RESOURCE_DESC::Buffer(bufferSize);
 	indexBuffer = createResource(indexDesc, D3D12_RESOURCE_STATE_COPY_DEST, nullptr, D3D12_HEAP_TYPE_DEFAULT);
 	auto uploadIB = createResource(indexDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, D3D12_HEAP_TYPE_UPLOAD);
-	writeToUploadHeapMemory(uploadIB.Get(), bufferSize, initResource);
+	updateBuffer(uploadIB.Get(), bufferSize, initResource);
 
 	auto command = createCommandList();
 	command->CopyResource(indexBuffer.Get(), uploadIB.Get());

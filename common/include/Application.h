@@ -127,6 +127,12 @@ public:
 		std::string nameAtPipeline;
 	};
 
+	struct U32Size
+	{
+		u32 w;
+		u32 h;
+	};
+
 	using PipelineState = ComPtr<ID3D12PipelineState>;
 
 	Application();
@@ -168,7 +174,7 @@ public:
 	void finishCommandList(ComPtr<ID3D12GraphicsCommandList>& command);
 	ComPtr<ID3D12GraphicsCommandList> createBundleCommandList();
 
-	void writeToUploadHeapMemory(ID3D12Resource1* resource, uint32_t size, const void* pData);
+	void updateBuffer(ID3D12Resource1* resource, uint32_t size, const void* pData);
 
 	std::shared_ptr<DescriptorManager> getDescriptorManager() { return mHeap; }
 
@@ -183,13 +189,13 @@ public:
 
 		model.vbBuffer = createResource(vbDesc, D3D12_RESOURCE_STATE_COPY_DEST, nullptr, dstHeapType);
 		auto uploadVB = createResource(vbDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, srcHeapType);
-		writeToUploadHeapMemory(uploadVB.Get(), bufferSize, vertices.data());
+		updateBuffer(uploadVB.Get(), bufferSize, vertices.data());
 
 		bufferSize = UINT(sizeof(UINT) * indices.size());
 		auto ibDesc = CD3DX12_RESOURCE_DESC::Buffer(bufferSize);
 		model.ibBuffer = createResource(ibDesc, D3D12_RESOURCE_STATE_COPY_DEST, nullptr, dstHeapType);
 		auto uploadIB = createResource(ibDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, srcHeapType);
-		writeToUploadHeapMemory(uploadIB.Get(), bufferSize, indices.data());
+		updateBuffer(uploadIB.Get(), bufferSize, indices.data());
 
 		auto command = createCommandList();
 		command->CopyResource(model.vbBuffer.Get(), uploadVB.Get());
@@ -279,8 +285,7 @@ protected:
 	PipelineType mPipelineType;
 	s32 mPipelinePass;
 
-	UINT mWidth;
-	UINT mHeight;
+	U32Size mScreenSize;
 	bool mIsAllowTearing;
 	HWND mHwnd;
 };

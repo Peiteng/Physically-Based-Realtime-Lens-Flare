@@ -6,7 +6,7 @@ void PBLensFlare::executeRayTracingLensFlareCommand()
 	auto rtv = mSwapchain->getCurrentRTV();
 	auto dsv = mDefaultDepthDSV;
 	setupDrawing(rtv, dsv);
-	updateBuffer();
+	updateBuffers();
 
 	if (mErrorShaderTbl.size() != 0)
 	{
@@ -78,8 +78,8 @@ void PBLensFlare::setupDrawing(DescriptorHandle rtv, DescriptorHandle dsv)
 	auto d3d12CpuDescHandleDsv = (D3D12_CPU_DESCRIPTOR_HANDLE)dsv;
 	mCommandList->OMSetRenderTargets(1, &d3d12CpuDescHandleRtv,
 		FALSE, &d3d12CpuDescHandleDsv);
-	auto viewport = CD3DX12_VIEWPORT(0.0f, 0.0f, float(mWidth), float(mHeight));
-	auto scissorRect = CD3DX12_RECT(0, 0, LONG(mWidth), LONG(mHeight));
+	auto viewport = CD3DX12_VIEWPORT(0.0f, 0.0f, mScreenSize.w, mScreenSize.h);
+	auto scissorRect = CD3DX12_RECT(0, 0, mScreenSize.w, mScreenSize.h);
 	mCommandList->RSSetViewports(1, &viewport);
 	mCommandList->RSSetScissorRects(1, &scissorRect);
 	const FLOAT blendFactor = 1.0f;

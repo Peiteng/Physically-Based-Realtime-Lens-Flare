@@ -1,12 +1,13 @@
 #include "../include/PBLensFlare.h"
 
-void PBLensFlare::updateBuffer()
+void PBLensFlare::updateBuffers()
 {
 	f32 nx = mPosX * 2.f - 1.f;
 	f32 ny = mPosY * 2.f - 1.f;
 
 	vec3 lightDir = normalize(vec3(-nx, ny, -1.f));
-	FLOAT2 backBufferSize = FLOAT2(mWidth, mHeight);
+
+	const f32 aspect = (f32)mScreenSize.w / (f32)mScreenSize.h;
 
 	tracingCB tracingCB;
 	tracingCB.lightDir = lightDir;
@@ -19,12 +20,12 @@ void PBLensFlare::updateBuffer()
 
 	drawBurstCB drawBurstCB;
 	drawBurstCB.lightDir = lightDir;
-	drawBurstCB.aspect = backBufferSize.x / backBufferSize.y;
+	drawBurstCB.aspect = aspect;
 	drawBurstCB.apertureRadius = (100 - mApertureRadius * mApertureRadius + 0.1) * 0.05;
 	drawBurstCB.color = mColor;
 
 	drawingCB drawingCB;
-	drawingCB.aspect = backBufferSize.x / backBufferSize.y;
+	drawingCB.aspect = aspect;
 	drawingCB.ghostScale = mGhostScale;
 	drawingCB.intensity = mIntensity * mGhostIntensityRatio;
 	drawingCB.color = mColor;
@@ -46,19 +47,19 @@ void PBLensFlare::updateBuffer()
 	utilityCB.rotAngle = mRotAngle;
 
 	SceneCB sceneCB;
-	auto mtxProj = DirectX::XMMatrixOrthographicLH(backBufferSize.x, backBufferSize.y, 0.0f, 10.0f);
+	auto mtxProj = DirectX::XMMatrixOrthographicLH(mScreenSize.w, mScreenSize.h, 0.0f, 10.0f);
 	XMStoreFloat4x4(&sceneCB.proj, XMMatrixTranspose(mtxProj));
-	sceneCB.backbufferSize = backBufferSize;
+	sceneCB.backbufferSize = FLOAT2(mScreenSize.w, mScreenSize.h);
 
 	if (mCBForceUpdate)
 	{
-		writeToUploadHeapMemory(mTracingCB[0].Get(), sizeof(tracingCB), &tracingCB);
-		writeToUploadHeapMemory(mDrawBurstCB[0].Get(), sizeof(drawBurstCB), &drawBurstCB);
-		writeToUploadHeapMemory(mDrawingCB[0].Get(), sizeof(drawingCB), &drawingCB);
-		writeToUploadHeapMemory(mFRFCB[0].Get(), sizeof(frfCB), &frfCB);
-		writeToUploadHeapMemory(mBurstCB[0].Get(), sizeof(burstCB), &burstCB);
-		writeToUploadHeapMemory(mUtilityCB[0].Get(), sizeof(utilityCB), &utilityCB);
-		writeToUploadHeapMemory(mLensFlareSceneCB[0].Get(), sizeof(sceneCB), &sceneCB);
+		updateBuffer(mTracingCB[0].Get(), sizeof(tracingCB), &tracingCB);
+		updateBuffer(mDrawBurstCB[0].Get(), sizeof(drawBurstCB), &drawBurstCB);
+		updateBuffer(mDrawingCB[0].Get(), sizeof(drawingCB), &drawingCB);
+		updateBuffer(mFRFCB[0].Get(), sizeof(frfCB), &frfCB);
+		updateBuffer(mBurstCB[0].Get(), sizeof(burstCB), &burstCB);
+		updateBuffer(mUtilityCB[0].Get(), sizeof(utilityCB), &utilityCB);
+		updateBuffer(mLensFlareSceneCB[0].Get(), sizeof(sceneCB), &sceneCB);
 		mCBForceUpdate = false;
 
 		mCacheTracingCBStruct = tracingCB;
@@ -73,38 +74,38 @@ void PBLensFlare::updateBuffer()
 	{
 		if (memcmp(&tracingCB, &mCacheTracingCBStruct, sizeof(tracingCB)))
 		{
-			writeToUploadHeapMemory(mTracingCB[0].Get(), sizeof(tracingCB), &tracingCB);
+			updateBuffer(mTracingCB[0].Get(), sizeof(tracingCB), &tracingCB);
 			mCacheTracingCBStruct = tracingCB;
 			mTraceRequired = true;
 		}
 		if (memcmp(&drawBurstCB, &mCacheDrawBurstCBStruct, sizeof(drawBurstCB)))
 		{
-			writeToUploadHeapMemory(mDrawBurstCB[0].Get(), sizeof(drawBurstCB), &drawBurstCB);
+			updateBuffer(mDrawBurstCB[0].Get(), sizeof(drawBurstCB), &drawBurstCB);
 			mCacheDrawBurstCBStruct = drawBurstCB;
 		}
 		if (memcmp(&drawingCB, &mCacheDrawingCBStruct, sizeof(drawingCB)))
 		{
-			writeToUploadHeapMemory(mDrawingCB[0].Get(), sizeof(drawingCB), &drawingCB);
+			updateBuffer(mDrawingCB[0].Get(), sizeof(drawingCB), &drawingCB);
 			mCacheDrawingCBStruct = drawingCB;
 		}
 		if (memcmp(&frfCB, &mCacheFRFCBStruct, sizeof(frfCB)))
 		{
-			writeToUploadHeapMemory(mFRFCB[0].Get(), sizeof(frfCB), &frfCB);
+			updateBuffer(mFRFCB[0].Get(), sizeof(frfCB), &frfCB);
 			mCacheFRFCBStruct = frfCB;
 		}
 		if (memcmp(&burstCB, &mCacheBurstCBStruct, sizeof(burstCB)))
 		{
-			writeToUploadHeapMemory(mBurstCB[0].Get(), sizeof(burstCB), &burstCB);
+			updateBuffer(mBurstCB[0].Get(), sizeof(burstCB), &burstCB);
 			mCacheBurstCBStruct = burstCB;
 		}
 		if (memcmp(&utilityCB, &mCacheUtilityCBStruct, sizeof(utilityCB)))
 		{
-			writeToUploadHeapMemory(mUtilityCB[0].Get(), sizeof(utilityCB), &utilityCB);
+			updateBuffer(mUtilityCB[0].Get(), sizeof(utilityCB), &utilityCB);
 			mCacheUtilityCBStruct = utilityCB;
 		}
 		if (memcmp(&sceneCB, &mCacheSceneCBStruct, sizeof(sceneCB)))
 		{
-			writeToUploadHeapMemory(mLensFlareSceneCB[0].Get(), sizeof(sceneCB), &sceneCB);
+			updateBuffer(mLensFlareSceneCB[0].Get(), sizeof(sceneCB), &sceneCB);
 			mCacheSceneCBStruct = sceneCB;
 		}
 	}

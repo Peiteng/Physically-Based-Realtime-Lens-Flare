@@ -519,7 +519,7 @@ private:
 	TextureData LoadTextureFromFile(const std::wstring& name, ImageSize& size, bool& isValid);
 
 	//update
-	void updateBuffer();
+	void updateBuffers();
 	void updateLens();
 	void updateComputeInfo();
 	void updateSourceImage();

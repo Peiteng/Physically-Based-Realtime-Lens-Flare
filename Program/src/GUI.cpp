@@ -75,7 +75,7 @@ void PBLensFlare::onMouseMove(UINT msg, int dx, int dy)
 	if (mButtonType == 0)
 	{
 		mPosX += dx * 0.001f;
-		mPosY += dy * 0.001f * mWidth / mHeight;
+		mPosY += dy * 0.001f * mScreenSize.w / mScreenSize.h;
 
 		f32 center = 0.5;
 		f32 left = center - 1;
@@ -90,8 +90,8 @@ void PBLensFlare::onMouseMove(UINT msg, int dx, int dy)
 
 void PBLensFlare::onSizeChanged(UINT width, UINT height, bool isMinimized)
 {
-	mWidth = width;
-	mHeight = height;
+	mScreenSize.w = width;
+	mScreenSize.h = height;
 	if (!mSwapchain || isMinimized)
 		return;
 
@@ -100,14 +100,14 @@ void PBLensFlare::onSizeChanged(UINT width, UINT height, bool isMinimized)
 
 	mDepthBuffer.Reset();
 	mHeapDSV->free(mDefaultDepthDSV);
-	createDefaultDepthBuffer(mWidth, mHeight);
+	createDefaultDepthBuffer(mScreenSize.w, mScreenSize.h);
 
 	mFrameIndex = mSwapchain->getCurrentBackBufferIndex();
 
-	mViewport.Width = f32(mWidth);
-	mViewport.Height = f32(mHeight);
-	mScissorRect.right = mWidth;
-	mScissorRect.bottom = mHeight;
+	mViewport.Width = f32(mScreenSize.w);
+	mViewport.Height = f32(mScreenSize.h);
+	mScissorRect.right = mScreenSize.w;
+	mScissorRect.bottom = mScreenSize.h;
 }
 
 void PBLensFlare::renderHUD()
@@ -136,7 +136,7 @@ void PBLensFlare::renderHUD()
 		ImGui::EndMenuBar();
 	}
 
-	ImGui::Text("ScreenSize: W %d px   H %d px", mWidth, mHeight);
+	ImGui::Text("ScreenSize: W %d px   H %d px", mScreenSize.w, mScreenSize.h);
 	ImGui::Text("Framerate: %.3f fps (%.3f ms)", ImGui::GetIO().Framerate, milisec);
 
 	if (ImGui::CollapsingHeader("Compute Infomation"))
