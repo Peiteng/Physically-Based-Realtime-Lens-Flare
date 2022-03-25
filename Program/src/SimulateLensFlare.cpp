@@ -6,7 +6,7 @@ void PBLensFlare::executeRayTracingLensFlareCommand()
 	auto rtv = mSwapchain->getCurrentRTV();
 	auto dsv = mDefaultDepthDSV;
 	setupDrawing(rtv, dsv);
-	updateBuffers();
+	updateBuffers();//
 
 	if (mErrorShaderTbl.size() != 0)
 	{
