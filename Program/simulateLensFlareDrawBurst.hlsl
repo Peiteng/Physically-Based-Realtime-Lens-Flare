@@ -1,7 +1,7 @@
 ﻿struct CBuffer
 {
     float3 lightDir;
-    float apertureRadius;
+    float mappingScale;
     
     float aspect;
     float3 color;
@@ -29,8 +29,8 @@ StarbustInput starburstVS(uint id : SV_VertexID)
     Out.pos = float4(screenPos, 0.0f, 1.0f);
     Out.uv.xy = float2(2.0f, 2.0f) * vertex;
     
+    Out.pos.xy *= computeConstants.mappingScale;
     Out.pos.xy += -computeConstants.lightDir.xy * 10;
-    Out.pos.xy *= computeConstants.apertureRadius * 0.1;
     Out.pos.xy *= float2(1.f, computeConstants.aspect);
     Out.uv.z = 1.f - 2 * lerp(0, 1, length(computeConstants.lightDir.xy));
     

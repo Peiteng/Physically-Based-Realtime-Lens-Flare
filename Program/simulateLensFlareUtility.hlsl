@@ -5,7 +5,7 @@ struct CBuffer
     float minColOfDustTex;
     float rotAngle;
     float N;
-    float apertureRadius;
+    float apertureRatio;
 };
 
 ConstantBuffer<CBuffer> computeConstants : register(b0);
@@ -102,7 +102,7 @@ void polygon(uint3 dispatchThreadID : SV_DispatchThreadID)
     float r_polygon = cos(PI / computeConstants.N) / cos(PI / computeConstants.N - rad);
     r_polygon *= r_circ;
 
-    float r_aperture = lerp(r_polygon, r_circ, computeConstants.apertureRadius);
+    float r_aperture = lerp(r_polygon, r_circ, computeConstants.apertureRatio);
         
     float col = step(pos, r_aperture);
 

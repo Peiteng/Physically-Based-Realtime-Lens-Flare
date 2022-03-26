@@ -1,5 +1,10 @@
 #include "../include/PBLensFlare.h"
 
+f32 PBLensFlare::computeFlareMappingSize(const u32 resolution, const f32 standardLambda, const f32 distApToSencor, const f32 apRadius)
+{
+	return resolution * standardLambda * distApToSencor / apRadius;
+}
+
 void PBLensFlare::updateBuffers()
 {
 	f32 nx = mPosX * 2.f - 1.f;
@@ -21,7 +26,7 @@ void PBLensFlare::updateBuffers()
 	drawBurstCB drawBurstCB;
 	drawBurstCB.lightDir = lightDir;
 	drawBurstCB.aspect = aspect;
-	drawBurstCB.apertureRadius = (100 - mApertureRadius * mApertureRadius + 0.1) * 0.05;
+	drawBurstCB.mappingScale = computeFlareMappingSize(MAX_DUST_IMAGE_SIZE, 633e-9, mLensDescription.distApToSencor * 1e-3, mApertureRadius * 2 * 1e-3) / (mLensDescription.sensorSize * 1e-3);
 	drawBurstCB.color = mColor;
 
 	drawingCB drawingCB;
@@ -31,10 +36,10 @@ void PBLensFlare::updateBuffers()
 	drawingCB.color = mColor;
 
 	FRFCB frfCB;
-	frfCB.distance = mPropdistance / 1000;
+	frfCB.distance = mPropdistance * 1e-3;
 	frfCB.interval = FLOAT2(mIntervalX * 1e-6, mIntervalX * 1e-6 * mTexwidth / mTexheight);
-	frfCB.interval.x *= 512.0f / mTexwidth;
-	frfCB.interval.y *= 512.0f / mTexheight;
+	frfCB.interval.x *= MAX_DUST_IMAGE_SIZE / mTexwidth;
+	frfCB.interval.y *= MAX_DUST_IMAGE_SIZE / mTexheight;
 
 	BurstCB burstCB;
 	burstCB.glareIntensity = mIntensity;
@@ -43,7 +48,7 @@ void PBLensFlare::updateBuffers()
 	UtilityCB utilityCB;
 	utilityCB.minColOfDustTex = 1 - mBurgstGlitter;
 	utilityCB.N = mApertureBladeNum;
-	utilityCB.apertureRadius = mApertureRadius / 10.f;
+	utilityCB.apertureRatio = mApertureRadius / mLensDescription.maxApertureRadius;
 	utilityCB.rotAngle = mRotAngle;
 
 	SceneCB sceneCB;

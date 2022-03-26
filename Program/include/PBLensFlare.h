@@ -132,7 +132,7 @@ private:
 	struct drawBurstCB
 	{
 		vec3 lightDir;
-		f32 apertureRadius = 5.0f;
+		f32 mappingScale = 1.0f;
 
 		f32 aspect;
 		FLOAT3 color;
@@ -167,7 +167,7 @@ private:
 		f32 minColOfDustTex;
 		f32 rotAngle;
 		f32 N;
-		f32 apertureRadius;
+		f32 apertureRatio;
 	};
 
 	struct SceneCB
@@ -187,6 +187,10 @@ private:
 		const f32 Nikon28_75mm_Bf = 39.683f;
 		const s32 Nikon28_75mm_ApertureID = 14;//AP_IDX
 		const s32 Nikon28_75mm_NumGhosts = 352; // 27!/2*(27-2)!
+
+		const f32 sensorSize = 24e-3;//24mm
+		const f32 distApToSencor = 20e-3;//20mm
+		const f32 maxApertureRadius = 10;//mm
 
 		//n at d-line(587.6 nm)
 		//https://patft.uspto.gov/netacgi/nph-Parser?Sect2=PTO1&Sect2=HITOFF&p=1&u=/netahtml/PTO/search-bool.html&r=1&f=G&l=50&d=PALL&RefSrch=yes&Query=PN/5835272
@@ -517,6 +521,7 @@ private:
 	//helper
 	s32 inv2pow(s32 n);
 	TextureData LoadTextureFromFile(const std::wstring& name, ImageSize& size, bool& isValid);
+	f32 computeFlareMappingSize(const u32 resolution, const f32 standardLambda, const f32 distApToSencor, const f32 apRadius);
 
 	//update
 	void updateBuffers();

@@ -208,7 +208,7 @@ void PBLensFlare::displayParameters()
 	
 		if (ImGui::CollapsingHeader("ADJUSTMENT"))
 		{
-			if (ImGui::SliderFloat("Aperture Opening [mm]", &mApertureRadius, 0.0f, 10.0f))
+			if (ImGui::SliderFloat("Aperture Opening [mm]", &mApertureRadius, 0.0f, mLensDescription.maxApertureRadius))
 			{
 				mGhostKernelRegenerate = true;
 				mBurstKernelRegenerate = true;
