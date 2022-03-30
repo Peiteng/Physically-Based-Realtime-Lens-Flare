@@ -178,7 +178,7 @@ void makeRayInvisible(inout Ray r)
     r.drawInfo.a = 0; //mark up invalid ray
 }
 
-void computeTracedRay(inout Ray r, float lambdaNM, int2 bounces, DispersionCurveEquationCoef coef)
+void computeTracedRay(inout Ray r, float lambdaNM, int2 bounces)
 {
     const int MAX_LENSID_DIFF = bounces.x + (bounces.x - bounces.y) + (computeConstants.numInterfaces - bounces.y) - 1;
     int bounceID = 0;
@@ -352,18 +352,7 @@ InfoPerLambda Trace(float2 origin, float wavelength, int2 bounces)
     //first intersected ray
     Ray ray = { originPos, computeConstants.lightDir.xyz, float4(0.xxx, 1) };
     
-    DispersionCurveEquationCoef coef;
-    coef.A0 = 3.45215485E+00;
-    coef.A1 = -1.40748042E-02;
-    coef.A2 = 0.00000000E+00;
-    coef.A3 = 5.02420375E-02;
-    coef.A4 = 3.57942817E-03;
-    coef.A5 = -4.94644665E-04;
-    coef.A6 = 1.29480898E-04;
-    coef.A7 = -1.35467075E-05;
-    coef.A8 = 6.96875364E-07;
-    
-    computeTracedRay(ray, wavelength, bounces, coef);
+    computeTracedRay(ray, wavelength, bounces);
 
     InfoPerLambda result;
     result.pos = float4(ray.pos.xyz, 1.f);
