@@ -61,7 +61,7 @@ struct CBuffer
     float numInterfaces;
     uint apertureIndex;
     float apertureRadius;
-    uint selectGhostID;
+    int selectGhostID;
     
     float invisibleReflectance;
     float3 padding;
