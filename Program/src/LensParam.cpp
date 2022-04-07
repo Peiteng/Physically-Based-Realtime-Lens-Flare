@@ -15,7 +15,7 @@ f32 MeterToMicro(f32 Meter)
 	return Meter * 1e6;
 }
 
-f32 DispersionCurveEquationCoef::computeRefIndex(f32 lambdaInMicroMeter)
+f32 Lens::computeRefIndex(f32 lambdaInMicroMeter)
 {
 	return sqrt(A0
 		+ A1 * pow(lambdaInMicroMeter, 2)
@@ -26,10 +26,5 @@ f32 DispersionCurveEquationCoef::computeRefIndex(f32 lambdaInMicroMeter)
 		+ A6 * pow(lambdaInMicroMeter, -8)
 		+ A7 * pow(lambdaInMicroMeter, -10)
 		+ A8 * pow(lambdaInMicroMeter, -12));
-}
-
-f32 AbbeParam::computeAbbeNumber_dLine()
-{
-	return (nd - 1) / (nF - nC);
 }
 

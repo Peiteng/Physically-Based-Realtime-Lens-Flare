@@ -1,4 +1,4 @@
-﻿struct DispersionCurveEquationCoef
+﻿struct Lens
 {
     float A0;
     float A1;
@@ -9,6 +9,9 @@
     float A6;
     float A7;
     float A8;
+    float nC;
+    float nd;
+    float nF;
 
     float computeRefIndex(float lambdaInMicroMeter)
     {
@@ -31,22 +34,4 @@
 		+ A7 * invLambdaPow10
 		+ A8 * invLambdaPow12);
     }
-};
-
-struct AbbeParam
-{
-    float nC;
-    float nd;
-    float nF;
-
-    float computeAbbeNumber_dLine()
-    {
-        return (nd - 1) / (nF - nC);
-    }
-};
-
-struct Lens
-{
-    DispersionCurveEquationCoef coef;
-    AbbeParam abbe;
 };

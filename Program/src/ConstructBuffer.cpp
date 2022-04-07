@@ -190,7 +190,7 @@ void PBLensFlare::constructLensFlareComponents()
 
 				if (leftRefIndex != 1)
 				{
-					f32 currentLeftAbbeDiff = abs(lens.abbe.nd - leftRefIndex);
+					f32 currentLeftAbbeDiff = abs(lens.nd - leftRefIndex);
 					if (leftRefIdxDiff > currentLeftAbbeDiff)
 					{
 						leftIdx = idx;
@@ -200,7 +200,7 @@ void PBLensFlare::constructLensFlareComponents()
 
 				if (rightRefIndex != 1)
 				{
-					f32 currentRightAbbeDiff = abs(lens.abbe.nd - rightRefIndex);
+					f32 currentRightAbbeDiff = abs(lens.nd - rightRefIndex);
 					if (rightRefIdxDiff > currentRightAbbeDiff)
 					{
 						rightIdx = idx;

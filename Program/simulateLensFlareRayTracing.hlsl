@@ -236,8 +236,8 @@ void computeTracedRay(inout Ray r, float lambdaNM, int2 bounces)
         int n0Idx = r.dir.z < 0.f ? F.n.x : F.n.z;
         int n2Idx = r.dir.z < 0.f ? F.n.z : F.n.x;
         
-        float n0 = n0Idx >= 0 ? lensBank.data[n0Idx].coef.computeRefIndex(lambdaNM * 1e-3) : 1;
-        float n2 = n2Idx >= 0 ? lensBank.data[n2Idx].coef.computeRefIndex(lambdaNM * 1e-3) : 1;
+        float n0 = n0Idx >= 0 ? lensBank.data[n0Idx].computeRefIndex(lambdaNM * 1e-3) : 1;
+        float n2 = n2Idx >= 0 ? lensBank.data[n2Idx].computeRefIndex(lambdaNM * 1e-3) : 1;
         
 #ifdef AR_CORTING
         float n1 = max(sqrt(n0 * n2), 1.38);

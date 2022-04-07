@@ -8,7 +8,7 @@ f32 NanoToMicro(f32 NanoMeter);
 f32 MeterToNano(f32 Meter);
 f32 MeterToMicro(f32 Meter);
 
-struct DispersionCurveEquationCoef
+struct Lens
 {
 	f32 A0;
 	f32 A1;
@@ -19,23 +19,11 @@ struct DispersionCurveEquationCoef
 	f32 A6;
 	f32 A7;
 	f32 A8;
-
-	f32 computeRefIndex(f32 lambdaInMicroMeter);
-};
-
-struct AbbeParam
-{
 	f32 nC;
 	f32 nd;
 	f32 nF;
 
-	f32 computeAbbeNumber_dLine();
-};
-
-struct Lens
-{
-	DispersionCurveEquationCoef coef;
-	AbbeParam abbe;
+	f32 computeRefIndex(f32 lambdaInMicroMeter);
 };
 
 enum LensName
