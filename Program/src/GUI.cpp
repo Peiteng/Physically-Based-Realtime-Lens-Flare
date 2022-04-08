@@ -204,6 +204,12 @@ void PBLensFlare::displayParameters()
 		{
 			ImGui::Combo("Draw Mode", (s32*)&mDrawMode,
 				"Fill\0Wire(DEBUG)\0Fill&Wire(DEBUG)\0UV(DEBUG)\0");
+
+			if (ImGui::Checkbox("Use DEBUG", &mDebug))
+			{
+				mTraceRequired = true;
+				mCBForceUpdate = true;
+			}
 		}
 	
 		if (ImGui::CollapsingHeader("ADJUSTMENT"))
@@ -272,7 +278,7 @@ void PBLensFlare::displayParameters()
 		{
 			ImGui::SliderFloat("Invisible Reflectance", &mInvisibleReflectance, 0, 0.1);
 		}
-		if (ImGui::CollapsingHeader("DEBUG"))
+		if (mDebug && ImGui::CollapsingHeader("DEBUG"))
 		{
 			ImGui::SliderInt("Select Ghost ID", &mSelectGhostID, -1, mLensDescription.NumGhosts - 1);
 		}

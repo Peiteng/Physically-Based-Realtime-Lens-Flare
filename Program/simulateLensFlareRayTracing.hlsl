@@ -348,9 +348,11 @@ InfoPerLambda Trace(float2 origin, float wavelength, int2 bounces)
     Ray originRay = { originPos, float3(0, 0, -1.f), 0.xxxx };
     Intersection i = getIntersectionInfo(originRay, lensInterface[0]);
     originPos = i.pos - computeConstants.lightDir.xyz;
+    //originPos = i.pos - float3(0,0,-1);
 
     //first intersected ray
     Ray ray = { originPos, computeConstants.lightDir.xyz, float4(0.xxx, 1) };
+    //Ray ray = { originPos, float3(0, 0, -1), float4(0.xxx, 1) };
     
     computeTracedRay(ray, wavelength, bounces);
 
@@ -382,13 +384,13 @@ void rayTraceCS(int3 groupID : SV_GroupID, uint3 groupThreadID : SV_GroupThreadI
     if (COLOR_ID == 0)
     {
         traceResult[bufferID].pos = result.pos;
-        
-        if (computeConstants.selectGhostID == -1)
+        #ifdef DEBUG
+         if (computeConstants.selectGhostID == -1)
         {
             traceResult[bufferID].drawInfo = float4(result.drawInfo.rgb, GetRegion(rayID2D, ghostOffset));
         }
         else
-        {//DEBUG
+        {
             if ((uint) ghostID == computeConstants.selectGhostID)
             {
                 traceResult[bufferID].drawInfo = float4(result.drawInfo.rgb, GetRegion(rayID2D, ghostOffset));
@@ -398,6 +400,9 @@ void rayTraceCS(int3 groupID : SV_GroupID, uint3 groupThreadID : SV_GroupThreadI
                 traceResult[bufferID].drawInfo.w = 0;
             }
         }
+        #else
+        traceResult[bufferID].drawInfo = float4(result.drawInfo.rgb, GetRegion(rayID2D, ghostOffset));
+        #endif
     }
     traceResult[bufferID].coordinates[COLOR_ID] = result.coordinates;
     traceResult[bufferID].color[COLOR_ID].rgb = result.reflectance.a * lambda2RGB(sampleLambdaNM);

@@ -79,7 +79,7 @@ private:
 	struct LensFlareAppInformationForCompute
 	{
 		s32 GRID_DIV = 16;
-		s32 NUM_THREADS = 16;
+		s32 NUM_THREADS = 8;
 		s32 NUM_GROUPS = GRID_DIV / NUM_THREADS;
 		s32 NUM_VERTICES_PER_BUNDLES = (GRID_DIV - 1) * (GRID_DIV - 1);
 		s32 SAMPLE_LAMBDA_NUM = LAMBDA_NUM;
@@ -358,6 +358,8 @@ private:
 	{
 		ShaderNameCompute_TraceRay,
 		ShaderNameCompute_TraceRayAR,
+		ShaderNameCompute_TraceRay_DEBUG,
+		ShaderNameCompute_TraceRayAR_DEBUG,
 
 		ShaderNameCompute_FRF,
 
@@ -571,6 +573,7 @@ private:
 	s32 mGlarelambdasamplenum;
 
 	bool mUseAR;
+	bool mDebug;
 
 	f32 mExecuteTimeMS;
 

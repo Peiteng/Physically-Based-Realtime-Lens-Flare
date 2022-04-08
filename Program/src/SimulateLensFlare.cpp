@@ -24,11 +24,11 @@ void PBLensFlare::executeRayTracingLensFlareCommand()
 
 	auto judge = [this]() -> bool { return mGhostIntensityRatio && mSpread > 0 && (mColor.x + mColor.y + mColor.z > 1e-4); } ();
 
-	if (mTraceRequired && judge)
-	{
+	//if (mTraceRequired && judge)
+	//{
 		traceRay();
-		mTraceRequired = false;
-	}
+		//mTraceRequired = false;
+	//}
 
 	if (judge)
 	{
@@ -89,7 +89,30 @@ void PBLensFlare::setupDrawing(DescriptorHandle rtv, DescriptorHandle dsv)
 void PBLensFlare::traceRay()
 {
 	PIXBeginEvent(mCommandList.Get(), 0, "traceRay");
-	setPipelineState(PipelineType_Compute, mUseAR ? ShaderNameCompute_TraceRayAR : ShaderNameCompute_TraceRay);
+	u32 state = 0;
+	if (mUseAR)
+	{
+		if (mDebug)
+		{
+			state = ShaderNameCompute_TraceRayAR_DEBUG;
+		}
+		else
+		{
+			state = ShaderNameCompute_TraceRayAR;
+		}
+	}
+	else
+	{
+		if (mDebug)
+		{
+			state = ShaderNameCompute_TraceRay_DEBUG;
+		}
+		else
+		{
+			state = ShaderNameCompute_TraceRay;
+		}
+	}
+	setPipelineState(PipelineType_Compute, state);
 	setPipelineConstantResource("computeConstants", mTracingCB[0]->GetGPUVirtualAddress());
 	setPipelineConstantResource("lensBank", mLensBank[0]->GetGPUVirtualAddress());
 	setPipelineResource("traceResult", mRayBundle.vertexBuffer.getUAV(mCommandList));
