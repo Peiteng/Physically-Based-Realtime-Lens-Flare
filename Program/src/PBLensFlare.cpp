@@ -22,8 +22,8 @@ PBLensFlare::PBLensFlare() :
 	mLensType(LensType_NIKON),
 
 	mSpread(4.228),
-	mGhostScale(0.014),
-	mApertureRadius(0.4),
+	mGhostScale(0.088),
+	mApertureRadius(0.224),
 	mGhostIntensityRatio(1000),
 	mColor(FLOAT3(1.f, 1.f, 1.f)),
 	mApertureBladeNum(8),
@@ -39,7 +39,6 @@ PBLensFlare::PBLensFlare() :
 	mPosY(0.485),
 	mPosXSave(0.51),//force update
 	mPosYSave(0.51),
-	mGlarelambdasamplenum(50),
 
 	mUseAR(false),
 

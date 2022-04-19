@@ -74,17 +74,10 @@ void PBLensFlare::onMouseMove(UINT msg, int dx, int dy)
 
 	if (mButtonType == 0)
 	{
-		mPosX += dx * 0.001f;
-		mPosY += dy * 0.001f * mScreenSize.w / mScreenSize.h;
+		const f32 smooth = 1e-3;
 
-		f32 center = 0.5;
-		f32 left = center - 1;
-		f32 right = center + 1;
-		f32 bottom = center - 1;
-		f32 top = center + 1;
-
-		mPosX = clamp(mPosX, left, right);
-		mPosY = clamp(mPosY, bottom, top);
+		mPosX = clamp(mPosX + smooth * dx, -1.f, 1.f);
+		mPosY = clamp(mPosY + smooth * dy, -1.f, 1.f);
 	}
 }
 
@@ -162,8 +155,7 @@ void PBLensFlare::renderHUD()
 		ImGui::Text("Ghost Bounce Usage: %s", unit(ghostByte).c_str());
 	}
 
-	ImGui::Text("Pos: X %f   Y %f", mPosX, mPosY);
-
+	ImGui::Text("Pos: X %f   Y %f", mPosX * 2.f - 1.f, -(mPosY * 2.f - 1.f));
 
 	ImGui::Spacing();
 
@@ -219,7 +211,7 @@ void PBLensFlare::displayParameters()
 				mGhostKernelRegenerate = true;
 				mBurstKernelRegenerate = true;
 			}
-			if (ImGui::SliderInt("Aperture Num", &mApertureBladeNum, 5, 10))
+			if (ImGui::SliderInt("Aperture Blade Num", &mApertureBladeNum, 5, 10))
 			{
 				mGhostKernelRegenerate = true;
 				mBurstKernelRegenerate = true;

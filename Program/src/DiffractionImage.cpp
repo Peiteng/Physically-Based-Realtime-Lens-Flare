@@ -65,7 +65,7 @@ void PBLensFlare::generateGhost()
 	multiply(mRWFullsizeTex.at(3), mRWFullsizeTex.at(7), mGhostCachedTex);
 	//oneElem(mRWFullsizeTex.at(1), mGhostCachedTex);
 
-	//mGhostKernelRegenerate = false;
+	mGhostKernelRegenerate = false;
 
 	PIXEndEvent(mCommandList.Get());
 }

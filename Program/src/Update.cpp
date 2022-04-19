@@ -7,10 +7,7 @@ f32 PBLensFlare::computeFlareMappingSize(const u32 resolution, const f32 standar
 
 void PBLensFlare::updateBuffers()
 {
-	f32 nx = mPosX * 2.f - 1.f;
-	f32 ny = mPosY * 2.f - 1.f;
-
-	vec3 lightDir = normalize(vec3(-nx, ny, -1.f));
+	vec3 lightDir = normalize(vec3(-(mPosX * 2.f - 1.f), mPosY * 2.f - 1.f, -1.f));
 
 	const f32 aspect = (f32)mScreenSize.w / (f32)mScreenSize.h;
 
@@ -43,7 +40,6 @@ void PBLensFlare::updateBuffers()
 
 	BurstCB burstCB;
 	burstCB.glareIntensity = mIntensity;
-	burstCB.glareLambdaSamplenum = mGlarelambdasamplenum;
 
 	UtilityCB utilityCB;
 	utilityCB.minColOfDustTex = 1 - mBurgstGlitter;

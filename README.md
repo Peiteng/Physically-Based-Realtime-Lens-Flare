@@ -1,8 +1,8 @@
 # Physically-Based-Realtime-Lens-Flare
 Realtime Lens Flare Rendering with Ray-Tracing and Lens Data
-![ExecuteImage](https://user-images.githubusercontent.com/65929274/149627276-29002228-32b9-4eba-a63d-7fe364ca2f22.png)
+![image](https://user-images.githubusercontent.com/65929274/164017769-6cb3d4ee-b241-4182-976f-5e384dad7ced.png)
+![image](https://user-images.githubusercontent.com/65929274/164018840-e2ea05ba-ac5d-4b38-9940-7d906fc58180.png)
 ![画像2](https://user-images.githubusercontent.com/65929274/162211430-cbe2a0e7-023c-4ad5-a795-68d3d734976a.png)
-![画像1](https://user-images.githubusercontent.com/65929274/162211262-ed3d804e-f458-433a-b858-1f202cfe3a76.png)
 ![スクリーンショット 2022-04-08 231220](https://user-images.githubusercontent.com/65929274/162453614-2a9c59bc-d01f-4599-acf3-e3b9e6d644a7.png)
 
 ![GIF](https://user-images.githubusercontent.com/65929274/149627485-21b8b988-0697-41ac-83c8-abd61ba2bb1e.gif)
@@ -44,16 +44,5 @@ By executing tracing of bundle, we can calculate intensity of ray. For improving
 
 
 ![process3](https://user-images.githubusercontent.com/65929274/147752267-cd979149-b8ca-455e-9527-6689375d1d6f.png)
-
-
-### Example
-Nikon
-![nikon](https://user-images.githubusercontent.com/65929274/149627168-2ec0d99b-0d12-40d8-b2e5-7ab559e0feb3.png)
-
-Angenieux
-![angenieux](https://user-images.githubusercontent.com/65929274/149627169-1f37fab5-96e6-4f1b-adfa-9f916a2efac9.png)
-
-Canon
-![canon](https://user-images.githubusercontent.com/65929274/149627173-9f5834f0-cced-4174-babb-d2b607c65a35.png)
 
 

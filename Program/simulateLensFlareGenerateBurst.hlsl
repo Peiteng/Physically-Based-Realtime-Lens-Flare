@@ -3,8 +3,7 @@
 struct CBuffer
 {
     float glareIntensity;
-    float glareLambdaSamplenum;
-    float2 padding;
+    float3 padding;
 };
 
 ConstantBuffer<CBuffer> computeConstants : register(b0);
@@ -62,8 +61,9 @@ void lambdaIntegral(uint3 dispatchThreadID : SV_DispatchThreadID)
     const float scale = 0.50f;
 
     float3 result = 0.f;
-    int num_steps = computeConstants.glareLambdaSamplenum * 3;
-    num_steps = 20 * 3;
+    int num_steps = 100;
+    
+    [unroll]
     for (int i = 0; i <= num_steps; ++i)
     {
         float n = (float) i / (float) num_steps;
@@ -86,14 +86,11 @@ void lambdaIntegral(uint3 dispatchThreadID : SV_DispatchThreadID)
 
 float2 Rotate(float2 p, float a)
 {
-    float x = p.x;
-    float y = p.y;
+    float2 sc;
+    sincos(a, sc.x, sc.y);
 
-    float cosa = cos(a);
-    float sina = sin(a);
-
-    float x1 = x * cosa - y * sina;
-    float y1 = y * cosa + x * sina;
+    float x1 = p.x * sc.y - p.y * sc.x;
+    float y1 = p.y * sc.y + p.x * sc.x;
 
     return float2(x1, y1);
 }
@@ -108,19 +105,20 @@ void burstFilter(uint3 dispatchThreadID : SV_DispatchThreadID)
     float2 uv = pos.xy / starburst_resolution - 0.5;
 
     float3 result = 0.f;
-
-    int num_steps = computeConstants.glareLambdaSamplenum * 3;
-    num_steps = 50 * 3;
+    
+    const int num_steps = 10;
+    
+    const float spiralRadius = 0.01;
+    
+    [unroll]
     for (int i = 0; i <= num_steps; ++i)
     {
         float n = (float) i / (float) num_steps;
         float phi = n * 2 * PI * 2.f;
         
-        float rotateAngle = n * 0.01f;
-        float2 rotatedUV = Rotate(uv + float2(cos(phi), sin(phi)) * 0.01f, rotateAngle) + 0.5f;
-
-        float3 starburst = realDistributionSource.SampleLevel(imageSampler, rotatedUV, 0).rgb * !Clamped(rotatedUV);
-        result += starburst * lerp(lambda2RGB(lerp(LAMBDA_NM_BLUE, LAMBDA_NM_RED, n)), 1.f, 0.5f);
+        float2 rotatedUV = uv + n * spiralRadius * float2(cos(phi), sin(phi)) + 0.5f;
+        
+        result += realDistributionSource.SampleLevel(imageSampler, rotatedUV, 0).rgb * !Clamped(rotatedUV) * lerp(lambda2RGB(lerp(LAMBDA_NM_BLUE, LAMBDA_NM_RED, n)), 1.f, 0.5f);
     }
 
     result /= (float) num_steps;

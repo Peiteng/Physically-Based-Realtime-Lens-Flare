@@ -158,8 +158,7 @@ private:
 	struct BurstCB
 	{
 		f32 glareIntensity;
-		f32 glareLambdaSamplenum;
-		FLOAT2 padding;
+		FLOAT3 padding;
 	};
 
 	struct UtilityCB
@@ -570,7 +569,6 @@ private:
 	f32 mPosY;
 	f32 mPosXSave;
 	f32 mPosYSave;
-	s32 mGlarelambdasamplenum;
 
 	bool mUseAR;
 	bool mDebug;
