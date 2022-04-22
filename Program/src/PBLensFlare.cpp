@@ -29,7 +29,7 @@ PBLensFlare::PBLensFlare() :
 	mApertureBladeNum(8),
 	mRotAngle(15),
 	mIntensity(20),
-	mBurgstGlitter(0.23),
+	mBurgstGlitter(0.1),
 	mSelectGhostID(-1),
 	mInvisibleReflectance(0),
 

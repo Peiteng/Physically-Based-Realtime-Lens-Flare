@@ -58,17 +58,18 @@ void lambdaIntegral(uint3 dispatchThreadID : SV_DispatchThreadID)
     float d = length(uv) * 2;
 
 	// -ve violet, +v reds
-    const float scale = 0.50f;
+    const float scale = 0.2f;
 
     float3 result = 0.f;
-    int num_steps = 100;
+    int num_steps = 10;
     
     [unroll]
     for (int i = 0; i <= num_steps; ++i)
     {
         float n = (float) i / (float) num_steps;
 
-        float2 scaled_uv = uv * lerp(1.f + scale, 1.f, n) + 0.5;
+        //float2 scaled_uv = uv * lerp(1.f + scale, 1.f, n) + 0.5;
+        float2 scaled_uv = uv * lerp(1.f, 1.f + scale, n) + 0.5;
 
         bool clamped = Clamped(scaled_uv);
         float lambda = lerp(LAMBDA_NM_BLUE, LAMBDA_NM_RED, n);
@@ -106,19 +107,18 @@ void burstFilter(uint3 dispatchThreadID : SV_DispatchThreadID)
 
     float3 result = 0.f;
     
-    const int num_steps = 10;
+    const int num_steps = 100;
     
     const float spiralRadius = 0.01;
     
     [unroll]
     for (int i = 0; i <= num_steps; ++i)
     {
-        float n = (float) i / (float) num_steps;
-        float phi = n * 2 * PI * 2.f;
+        float delta = (float) i / (float) num_steps;
         
-        float2 rotatedUV = uv + n * spiralRadius * float2(cos(phi), sin(phi)) + 0.5f;
+        float2 rotatedUV = uv + spiralRadius * float2(cos(2 * PI * delta), sin(2 * PI * delta)) + 0.5f;
         
-        result += realDistributionSource.SampleLevel(imageSampler, rotatedUV, 0).rgb * !Clamped(rotatedUV) * lerp(lambda2RGB(lerp(LAMBDA_NM_BLUE, LAMBDA_NM_RED, n)), 1.f, 0.5f);
+        result += realDistributionSource.SampleLevel(imageSampler, rotatedUV, 0).rgb * !Clamped(rotatedUV) * lerp(lambda2RGB(lerp(LAMBDA_NM_BLUE, LAMBDA_NM_RED, delta)), 1.f, 0.5f);
     }
 
     result /= (float) num_steps;

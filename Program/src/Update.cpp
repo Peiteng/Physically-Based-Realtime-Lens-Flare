@@ -34,6 +34,7 @@ void PBLensFlare::updateBuffers()
 
 	FRFCB frfCB;
 	frfCB.distance = mPropdistance * 1e-3;
+	//frfCB.distance = 0;
 	frfCB.interval = FLOAT2(mIntervalX * 1e-6, mIntervalX * 1e-6 * mTexwidth / mTexheight);
 	frfCB.interval.x *= MAX_DUST_IMAGE_SIZE / mTexwidth;
 	frfCB.interval.y *= MAX_DUST_IMAGE_SIZE / mTexheight;

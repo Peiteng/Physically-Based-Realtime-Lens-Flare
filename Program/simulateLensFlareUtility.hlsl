@@ -97,13 +97,12 @@ void polygon(uint3 dispatchThreadID : SV_DispatchThreadID)
     float rad = atan2(uv.x, uv.y) + 2.0 * PI + computeConstants.rotAngle * PI / 180.0f;
     rad = rad % (2.0 * PI / computeConstants.N);
 		
-    float r_circ = 0.45;
+    float r_circ = 0.49;
         
-    float r_polygon = cos(PI / computeConstants.N) / cos(PI / computeConstants.N - rad);
-    r_polygon *= r_circ;
-
-    float shapeFactor = 0.05;
-    float r_aperture = lerp(r_polygon, r_circ, (computeConstants.apertureRatio + shapeFactor) / (1 + shapeFactor));
+    float r_polygon = r_circ * cos(PI / computeConstants.N) / cos(PI / computeConstants.N - rad);
+    
+    float interpolateCoef = 1 - 1 / (1 - computeConstants.apertureRatio);
+    float r_aperture = lerp(r_polygon, r_circ, interpolateCoef);
         
     float col = step(pos, r_aperture);
 

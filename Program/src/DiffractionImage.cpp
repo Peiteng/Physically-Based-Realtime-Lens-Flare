@@ -70,6 +70,35 @@ void PBLensFlare::generateGhost()
 	PIXEndEvent(mCommandList.Get());
 }
 
+//fft test
+//void PBLensFlare::generateGhost()
+//{
+//	PIXBeginEvent(mCommandList.Get(), 0, "FFTTest");
+//
+//	for (auto& tex : mRWFullsizeTex)
+//	{
+//		clear(tex);
+//	}
+//
+//	polygon(mRWFullsizeTex.at(1));
+//	copy(mRWFullsizeTex.at(1), mRWFullsizeTex.at(7));
+//
+//	//Angular Spectrum Method
+//	FFT2D(mRWFullsizeTex.at(1), mRWFullsizeTex.at(2));
+//	FFT2D(mRWFullsizeTex.at(1), mRWFullsizeTex.at(2), false);
+//
+//	intensity(
+//		mRWFullsizeTex.at(1), mRWFullsizeTex.at(2)
+//		, mRWFullsizeTex.at(3));
+//
+//	multiply(mRWFullsizeTex.at(3), mRWFullsizeTex.at(7), mGhostCachedTex);
+//	//oneElem(mRWFullsizeTex.at(1), mGhostCachedTex);
+//
+//	//mGhostKernelRegenerate = false;
+//
+//	PIXEndEvent(mCommandList.Get());
+//}
+
 void PBLensFlare::drawFRF(DX12Buffer& Real, DX12Buffer& Image)
 {
 	PIXBeginEvent(mCommandList.Get(), 0, "drawFRF");
