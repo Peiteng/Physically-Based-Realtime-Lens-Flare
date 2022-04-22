@@ -175,6 +175,7 @@ float FresnelAR(float theta0RAD, float lambda, float d1, float n0, float n1, flo
 void makeRayInvisible(inout Ray r)
 {
     r.pos = 0;
+    r.pos.z = -1;//clipping culling
     r.drawInfo.a = 0; //mark up invalid ray
 }
 
@@ -274,6 +275,10 @@ void computeTracedRay(inout Ray r, float lambdaNM, int2 bounces)
     if (k < MAX_LENSID_DIFF)
     {
         makeRayInvisible(r);
+    }
+    else
+    {
+        r.pos.z = 1;//valid ray
     }
 }
 

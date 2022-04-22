@@ -70,7 +70,6 @@ PSInput rayTraceVS(uint vertexID : SV_VertexID, uint instanceID : SV_InstanceID)
     // (GRID_DIV  * GRID_DIV) vertices per Ghost
     PSInput vertex = traceResult[vertexID + instanceID * GRID_DIV * GRID_DIV];
     vertex.pos.xy *= float2(1.f, computeConstants.aspect) * computeConstants.ghostScale;
-    
     return vertex;
 }
 
