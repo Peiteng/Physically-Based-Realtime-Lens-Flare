@@ -162,7 +162,12 @@ void PBLensFlare::renderHUD()
 	if (ImGui::CollapsingHeader("Images [.png]"))
 	{
 		ImGui::InputText("Aperture Dust Image", mTextureNames[0].data(), MAX_PATH);
-
+		ImGui::SetNextWindowSize(ImVec2(mTexwidth / 2, mTexheight / 2), ImGuiCond_Once);
+		ImVec2 avail_size = ImGui::GetContentRegionAvail();
+		avail_size.x /= 4;
+		avail_size.y /= 4;
+		avail_size.y *= avail_size.x / avail_size.y;
+		ImGui::Image((void*)D3D12_GPU_DESCRIPTOR_HANDLE(mFullsizeTex.at(ReadOmlyImage_ApertureDust).SRV).ptr, avail_size);
 		if (!mFFTEnable)
 		{
 			ImGui::TextColored(IMVEC_RED, "Aperture Dust Image Name Is Invalid");
