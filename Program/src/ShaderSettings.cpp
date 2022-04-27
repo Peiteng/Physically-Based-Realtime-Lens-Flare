@@ -494,7 +494,6 @@ void PBLensFlare::setupGraphicsPipeline()
 		mShaderSettingGraphicsTbl[setting].descriptors["computeConstants"] = DescriptorInfo{ 0 , D3D12_DESCRIPTOR_RANGE{ D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0} };
 		mShaderSettingGraphicsTbl[setting].descriptors["traceResult"] = DescriptorInfo{ 1, D3D12_DESCRIPTOR_RANGE{ D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0} };
 		mShaderSettingGraphicsTbl[setting].descriptors["texture"] = DescriptorInfo{ 2, D3D12_DESCRIPTOR_RANGE{ D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 1} };
-		mShaderSettingGraphicsTbl[setting].imputElements.push_back(D3D12_INPUT_ELEMENT_DESC{ "POSITION",   0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 });
 		mShaderSettingGraphicsTbl[setting].rasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
 		mShaderSettingGraphicsTbl[setting].rasterizerState.CullMode = D3D12_CULL_MODE_NONE;
 		mShaderSettingGraphicsTbl[setting].rasterizerState.DepthClipEnable = true;
@@ -518,7 +517,6 @@ void PBLensFlare::setupGraphicsPipeline()
 		mShaderSettingGraphicsTbl[setting].descriptors["computeConstants"] = DescriptorInfo{ 0 , D3D12_DESCRIPTOR_RANGE{ D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0} };
 		mShaderSettingGraphicsTbl[setting].descriptors["traceResult"] = DescriptorInfo{ 1, D3D12_DESCRIPTOR_RANGE{ D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0} };
 		mShaderSettingGraphicsTbl[setting].descriptors["texture"] = DescriptorInfo{ 2, D3D12_DESCRIPTOR_RANGE{ D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 1} };
-		mShaderSettingGraphicsTbl[setting].imputElements.push_back(D3D12_INPUT_ELEMENT_DESC{ "POSITION",   0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 });
 		mShaderSettingGraphicsTbl[setting].rasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
 		mShaderSettingGraphicsTbl[setting].rasterizerState.CullMode = D3D12_CULL_MODE_NONE;
 		mShaderSettingGraphicsTbl[setting].rasterizerState.DepthClipEnable = true;
@@ -543,7 +541,6 @@ void PBLensFlare::setupGraphicsPipeline()
 		mShaderSettingGraphicsTbl[setting].descriptors["computeConstants"] = DescriptorInfo{ 0 , D3D12_DESCRIPTOR_RANGE{ D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0} };
 		mShaderSettingGraphicsTbl[setting].descriptors["traceResult"] = DescriptorInfo{ 1, D3D12_DESCRIPTOR_RANGE{ D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0} };
 		mShaderSettingGraphicsTbl[setting].descriptors["texture"] = DescriptorInfo{ 2, D3D12_DESCRIPTOR_RANGE{ D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 1} };
-		mShaderSettingGraphicsTbl[setting].imputElements.push_back(D3D12_INPUT_ELEMENT_DESC{ "POSITION",   0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 });
 		mShaderSettingGraphicsTbl[setting].rasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
 		mShaderSettingGraphicsTbl[setting].rasterizerState.CullMode = D3D12_CULL_MODE_NONE;
 		mShaderSettingGraphicsTbl[setting].rasterizerState.DepthClipEnable = true;
@@ -561,7 +558,6 @@ void PBLensFlare::setupGraphicsPipeline()
 		mShaderSettingGraphicsTbl[setting].descriptorKeys.push_back("texture");
 		mShaderSettingGraphicsTbl[setting].descriptors["computeConstants"] = DescriptorInfo{ 0 , D3D12_DESCRIPTOR_RANGE{ D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0} };
 		mShaderSettingGraphicsTbl[setting].descriptors["texture"] = DescriptorInfo{ 1, D3D12_DESCRIPTOR_RANGE{ D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0} };
-		mShaderSettingGraphicsTbl[setting].imputElements.push_back(D3D12_INPUT_ELEMENT_DESC{ "POSITION",   0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 });
 		mShaderSettingGraphicsTbl[setting].rasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
 		mShaderSettingGraphicsTbl[setting].rasterizerState.CullMode = D3D12_CULL_MODE_NONE;
 		mShaderSettingGraphicsTbl[setting].rasterizerState.DepthClipEnable = false;

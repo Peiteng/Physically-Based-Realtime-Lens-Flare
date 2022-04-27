@@ -101,8 +101,7 @@ void polygon(uint3 dispatchThreadID : SV_DispatchThreadID)
         
     float r_polygon = r_circ * cos(PI / computeConstants.N) / cos(PI / computeConstants.N - rad);
     
-    float interpolateCoef = 1 - 1 / (1 - computeConstants.apertureRatio);
-    float r_aperture = lerp(r_polygon, r_circ, interpolateCoef);
+    float r_aperture = lerp(r_polygon, r_circ, computeConstants.apertureRatio * computeConstants.apertureRatio * computeConstants.apertureRatio);
         
     float col = step(pos, r_aperture);
 

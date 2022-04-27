@@ -187,7 +187,7 @@ void PBLensFlare::renderHUD()
 
 	ImGui::End();
 
-	displayImageImGui(D3D12_GPU_DESCRIPTOR_HANDLE(mRWdisplayTex.at(DisplayImage_Aperture).getSRV(mCommandList)), "apertureImage");
+	//displayImageImGui(D3D12_GPU_DESCRIPTOR_HANDLE(mRWdisplayTex.at(DisplayImage_Aperture).getSRV(mCommandList)), "apertureImage");
 
 	ImGui::Render();
 	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), mCommandList.Get());
@@ -211,6 +211,13 @@ void PBLensFlare::displayParameters()
 	
 		if (ImGui::CollapsingHeader("ADJUSTMENT"))
 		{
+			ImGui::Text("Aperture Image");
+			ImGui::SetNextWindowSize(ImVec2(mTexwidth / 2, mTexheight / 2), ImGuiCond_Once);
+			ImVec2 avail_size = ImGui::GetContentRegionAvail();
+			avail_size.x /= 4;
+			avail_size.y /= 4;
+			avail_size.y *= avail_size.x / avail_size.y;
+			ImGui::Image((void*)D3D12_GPU_DESCRIPTOR_HANDLE(mRWdisplayTex.at(DisplayImage_Aperture).getSRV(mCommandList)).ptr, avail_size);
 			if (ImGui::SliderFloat("Aperture Opening [mm]", &mApertureRadius, 0.0f, mLensDescription.maxApertureRadius))
 			{
 				mGhostKernelRegenerate = true;
